@@ -38,17 +38,30 @@ const Home = {
 </div>
 
       <div class="bloch-row">
-        <canvas ref="bloch0"></canvas>
-        <canvas ref="bloch1"></canvas>
-        <canvas ref="bloch2"></canvas>
-      </div>
+
+  <div>
+    <p>Qubit 0</p>
+    <canvas ref="bloch0"></canvas>
+  </div>
+
+  <div>
+    <p>Qubit 1</p>
+    <canvas ref="bloch1"></canvas>
+  </div>
+
+  <div>
+    <p>Qubit 2</p>
+    <canvas ref="bloch2"></canvas>
+  </div>
+
+</div>
 
       <div class="card">
         <h2>Density Matrix</h2>
         <canvas
           ref="densityCanvas"
-          width="400"
-          height="400"
+          width="520"
+height="520"
         ></canvas>
       </div>
       
@@ -56,7 +69,7 @@ const Home = {
         <h2>Entanglement Graph</h2>
         <canvas
           ref="entanglementCanvas"
-          width="400"
+          width="600"
           height="250"
         ></canvas>
       </div>
@@ -90,7 +103,15 @@ const Home = {
         <button @click="applyGate('Z', 1)">Z</button>
         <button @click="applyGate('S', 1)">S</button>
         <button @click="applyGate('T', 1)">T</button>
-      
+
+      <h3>Qubit 2</h3>
+
+<button @click="applyGate('H', 2)">H</button>
+<button @click="applyGate('X', 2)">X</button>
+<button @click="applyGate('Y', 2)">Y</button>
+<button @click="applyGate('Z', 2)">Z</button>
+<button @click="applyGate('S', 2)">S</button>
+<button @click="applyGate('T', 2)">T</button>
         <hr>
       
         <button @click="applyCNOT">
@@ -98,9 +119,13 @@ const Home = {
         </button>
       
         <button @click="createBellState">
-          Bell State
+          Create Bell Pair
         </button>
-      
+
+      <button @click="createGHZState">
+  GHZ State
+</button>
+
         <button @click="measure">
           Measure
         </button>
@@ -345,6 +370,22 @@ worker: null
   },
 
   methods: {
+    async createGHZState() {
+
+  await this.applyGate('H', 0);
+
+  setTimeout(async () => {
+
+    await this.applyCNOT(0, 1);
+
+    setTimeout(async () => {
+
+      await this.applyCNOT(1, 2);
+
+    }, 50);
+
+  }, 50);
+},
     initWebGL() {
   
       const canvas = this.$refs.webglCanvas;
