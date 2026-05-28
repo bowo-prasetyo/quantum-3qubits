@@ -25,6 +25,18 @@ const Home = {
         <canvas ref="canvas" width="400" height="400"></canvas>
       </div>
 
+      <div class="card">
+
+  <h2>Probability Visualization</h2>
+
+  <canvas
+    ref="probabilityCanvas"
+    width="800"
+    height="300"
+  ></canvas>
+
+</div>
+
       <div class="bloch-row">
         <canvas ref="bloch0"></canvas>
         <canvas ref="bloch1"></canvas>
@@ -257,12 +269,18 @@ const Home = {
 
   data() {
     return {
-      state: [
-        { re: 1, im: 0 },
-        { re: 0, im: 0 }
-      ],
-      measurement: '-',
-      worker: null
+      stateRe: new Float64Array([
+  1,0,0,0,0,0,0,0
+]),
+
+stateIm: new Float64Array(8),
+
+circuit: [],
+
+measurement: '-',
+
+worker: null
+    
     };
   },
 
@@ -271,21 +289,21 @@ const Home = {
       return JSON.stringify(this.state, null, 2);
     },
     probabilities() {
-      
-      return this.state.map(v => {
-        const probabilities = [];
-        
-        for (let i = 0; i < 8; i++) {
-        
-          const p =
-            this.stateRe[i] * this.stateRe[i] +
-            this.stateIm[i] * this.stateIm[i];
-        
-          probabilities.push(p);
-        }
-        return probabilities;
-      });
-    }
+
+  const result = [];
+
+  for (let i = 0; i < 8; i++) {
+
+    result.push(
+
+      this.stateRe[i] * this.stateRe[i] +
+
+      this.stateIm[i] * this.stateIm[i]
+    );
+  }
+
+  return result;
+}
   },
 
   async mounted() {
@@ -294,25 +312,23 @@ const Home = {
     this.worker = new Worker('./worker.js');
 
     this.worker.onmessage = async (e) => {
-      const msg = e.data;
 
-      if (msg.type === 'state') {
-        this.state = msg.state;
-      }
+  this.stateRe = e.data.re;
 
-      if (msg.type === 'measurement') {
-        this.measurement = msg.measured;
-        this.state = msg.state;
-      }
+  this.stateIm = e.data.im;
 
-      await window.db.saveState(
-        this.stateRe,
-        this.stateIm,
-        this.circuit
-      );
-      this.drawProbabilities();
-      this.renderWebGL();
-    };
+  await window.db.saveState(
+    this.stateRe,
+    this.stateIm,
+    this.circuit
+  );
+
+  this.drawProbabilities();
+
+  this.drawDensityMatrix();
+
+  this.renderWebGL();
+};
 
     const saved = await window.db.loadState();
     
@@ -455,31 +471,49 @@ const Home = {
       }, 50);
     },
 
-    applyCNOT() {
-    
-      const plainState = structuredClone(
-        Vue.toRaw(this.state)
-      );
-    
-      this.worker.postMessage({
-        type: 'cnot',
-        state: plainState
-      });
-    },
-    
+    applyCNOT(control = 0, target = 1) {
+
+  this.worker.postMessage({
+
+    type: 'cnot',
+
+    control,
+
+    target,
+
+    qubitCount: 3,
+
+    re: this.stateRe,
+
+    im: this.stateIm
+
+  }, [
+    this.stateRe.buffer,
+    this.stateIm.buffer
+  ]);
+},
+
     applyGate(gate, targetQubit) {
-    
-      const plainState = structuredClone(
-        Vue.toRaw(this.state)
-      );
-    
-      this.worker.postMessage({
-        type: 'gate',
-        gate,
-        targetQubit,
-        state: plainState
-      });
-    },
+
+  this.worker.postMessage({
+
+    type: 'gate',
+
+    gate,
+
+    targetQubit,
+
+    qubitCount: 3,
+
+    re: this.stateRe,
+
+    im: this.stateIm
+
+  }, [
+    this.stateRe.buffer,
+    this.stateIm.buffer
+  ]);
+},
     
     measure() {
       const plainState = structuredClone(Vue.toRaw(this.state));
@@ -491,12 +525,11 @@ const Home = {
     },
         
     async reset() {
-      this.state = [
-          { re: 1, im: 0 },
-          { re: 0, im: 0 },
-          { re: 0, im: 0 },
-          { re: 0, im: 0 }
-        ];
+      this.stateRe = new Float64Array([
+  1,0,0,0,0,0,0,0
+]);
+
+this.stateIm = new Float64Array(8);
       
         this.measurement = '-';
       
