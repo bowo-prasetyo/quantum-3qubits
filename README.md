@@ -1,8 +1,8 @@
-# 2 Qubits Quantum Simulator
+# 3 Qubits Quantum Simulator
 
 A minimal client-side quantum computer simulator built with modern browser technologies.
 
-The application demonstrates the fundamental behavior of a 2-qubit quantum computer directly inside the browser without requiring any backend server.
+The application demonstrates the fundamental behavior of a 3-qubit quantum computer directly inside the browser without requiring any backend server.
 
 The simulator supports:
 
@@ -20,7 +20,7 @@ The application is fully client-side and deployable on GitHub Pages.
 ## Live Demo
 
 - Demo: https://bowo-prasetyo.github.io/quantum-2qubits/
-- Repository: https://github.com/bowo-prasetyo/quantum-2qubits/
+- Repository: https://github.com/bowo-prasetyo/quantum-3qubits/
   
 ---
 
