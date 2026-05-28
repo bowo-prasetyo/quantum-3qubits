@@ -17,7 +17,7 @@ const Home = {
         <h1>3 Qubits Quantum Simulator</h1>
 
         <p>
-          Minimal quantum computer simulator that demonstrates the basic behavior of 2 quantum bits (qubits).
+          Minimal quantum computer simulator that demonstrates the basic behavior of 3 quantum bits (qubits).
         </p>
       </div>
 
@@ -325,8 +325,20 @@ worker: null
 
   computed: {
     prettyState() {
-      return JSON.stringify(this.state, null, 2);
-    },
+
+  const result = [];
+
+  for (let i = 0; i < 8; i++) {
+
+    result.push({
+      basis: i.toString(2).padStart(3, '0'),
+      re: this.stateRe[i],
+      im: this.stateIm[i]
+    });
+  }
+
+  return JSON.stringify(result, null, 2);
+},
     probabilities() {
 
   const result = [];
@@ -356,6 +368,10 @@ worker: null
 
   this.stateIm = e.data.im;
 
+  if (e.data.measured !== undefined) {
+  this.measurement = e.data.measured;
+}
+      
   await window.db.saveState(
     this.stateRe,
     this.stateIm,
@@ -580,13 +596,22 @@ worker: null
 },
     
     measure() {
-      const plainState = structuredClone(Vue.toRaw(this.state));
-    
-      this.worker.postMessage({
-        type: 'measure',
-        state: plainState
-      });
-    },
+
+  this.worker.postMessage({
+
+    type: 'measure',
+
+    qubitCount: 3,
+
+    re: this.stateRe,
+
+    im: this.stateIm
+
+  }, [
+    this.stateRe.buffer,
+    this.stateIm.buffer
+  ]);
+},
         
     async reset() {
       this.stateRe = new Float64Array([
