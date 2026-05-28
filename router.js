@@ -50,6 +50,16 @@ const Home = {
       </div>
 
       <div class="card">
+        <h2>WebGL Visualization</h2>
+      
+        <canvas
+          ref="webglCanvas"
+          width="600"
+          height="300"
+        ></canvas>
+      </div>
+
+      <div class="card">
       
         <h3>Qubit 0</h3>
       
@@ -271,6 +281,8 @@ const Home = {
   },
 
   async mounted() {
+    this.initWebGL();
+    this.renderWebGL();
     this.worker = new Worker('./worker.js');
 
     this.worker.onmessage = async (e) => {
@@ -287,6 +299,7 @@ const Home = {
 
       await window.db.saveState(this.state);
       this.draw();
+      this.renderWebGL();
     };
 
     const saved = await window.db.loadState();
@@ -299,10 +312,41 @@ const Home = {
   },
 
   methods: {
+    initWebGL() {
+  
+      const canvas = this.$refs.webglCanvas;
+  
+      this.gl = canvas.getContext('webgl');
+  
+      if (!this.gl) {
+        console.error('WebGL unsupported');
+        return;
+      }
+  
+      const gl = this.gl;
+  
+      gl.viewport(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+  
+      gl.clearColor(0, 0, 0, 1);
+    },
+  
+    renderWebGL() {
+  
+      const gl = this.gl;
+  
+      if (!gl) return;
+  
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    },
+        
     drawDensityMatrix() {
 
       const canvas = this.$refs.densityCanvas;
-      const gl = canvas.getContext('webgl');
 
       const ctx = canvas.getContext('2d');
     
@@ -448,7 +492,6 @@ const Home = {
     draw() {
     
       const canvas = this.$refs.canvas;
-      const gl = canvas.getContext('webgl');
 
       const ctx = canvas.getContext('2d');
     
