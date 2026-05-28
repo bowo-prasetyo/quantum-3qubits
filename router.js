@@ -21,6 +21,20 @@ const Home = {
         </p>
       </div>
 
+<div class="card">
+  <h2>System Information</h2>
+
+  <p>Qubits: 3</p>
+
+  <p>Hilbert Space Size: 8</p>
+
+  <p>WebGL: Enabled</p>
+
+  <p>WebGPU:
+    {{ webgpuSupported ? 'Supported' : 'Not Supported' }}
+  </p>
+</div>
+
       <div class="card">
         <canvas ref="canvas" width="400" height="400"></canvas>
       </div>
