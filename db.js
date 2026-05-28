@@ -16,32 +16,74 @@ function openDB() {
   });
 }
 
-export async function saveState(state) {
-  const db = await openDB();
-
-  const plainState = JSON.parse(JSON.stringify(state));
+export async function saveState(
+  stateRe,
+  stateIm,
+  circuit
+) {
 
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
 
-    store.put(plainState, KEY);
+    const tx = db.transaction(
+      'states',
+      'readwrite'
+    );
+
+    const store = tx.objectStore('states');
+
+    store.put({
+      id: 'latest',
+
+      re: Array.from(stateRe),
+
+      im: Array.from(stateIm),
+
+      circuit
+    });
 
     tx.oncomplete = () => resolve();
+
     tx.onerror = () => reject(tx.error);
+
   });
 }
 
 export async function loadState() {
-  const db = await openDB();
 
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
 
-    const req = store.get(KEY);
+    const tx = db.transaction(
+      'states',
+      'readonly'
+    );
 
-    req.onsuccess = () => resolve(req.result);
+    const store = tx.objectStore('states');
+
+    const req = store.get('latest');
+
+    req.onsuccess = () => {
+
+      const result = req.result;
+
+      if (!result) {
+
+        resolve(null);
+
+        return;
+      }
+
+      resolve({
+
+        stateRe: new Float64Array(result.re),
+
+        stateIm: new Float64Array(result.im),
+
+        circuit: result.circuit || []
+
+      });
+    };
+
     req.onerror = () => reject(req.error);
+
   });
 }
