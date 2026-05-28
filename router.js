@@ -271,11 +271,19 @@ const Home = {
       return JSON.stringify(this.state, null, 2);
     },
     probabilities() {
+      
       return this.state.map(v => {
-        return (
-          v.re * v.re +
-          v.im * v.im
-        );
+        const probabilities = [];
+        
+        for (let i = 0; i < 8; i++) {
+        
+          const p =
+            this.stateRe[i] * this.stateRe[i] +
+            this.stateIm[i] * this.stateIm[i];
+        
+          probabilities.push(p);
+        }
+        return probabilities;
       });
     }
   },
@@ -297,18 +305,27 @@ const Home = {
         this.state = msg.state;
       }
 
-      await window.db.saveState(this.state);
-      this.draw();
+      await window.db.saveState(
+        this.stateRe,
+        this.stateIm,
+        this.circuit
+      );
+      this.drawProbabilities();
       this.renderWebGL();
     };
 
     const saved = await window.db.loadState();
-
+    
     if (saved) {
-      this.state = saved;
+    
+      this.stateRe = saved.stateRe;
+    
+      this.stateIm = saved.stateIm;
+    
+      this.circuit = saved.circuit;
     }
 
-    this.draw();
+    this.drawProbabilities();
   },
 
   methods: {
@@ -483,74 +500,76 @@ const Home = {
       
         this.measurement = '-';
       
-        await window.db.saveState(this.state);
+        await window.db.saveState(
+          this.stateRe,
+          this.stateIm,
+          this.circuit
+        );
       
-        this.draw();
+        this.drawProbabilities();
 
     },
 
-    draw() {
+    drawProbabilities() {
     
-      const canvas = this.$refs.canvas;
-
+      const canvas = this.$refs.probabilityCanvas;
+    
       const ctx = canvas.getContext('2d');
     
-      const W = canvas.width;
-      const H = canvas.height;
-    
-      ctx.clearRect(0, 0, W, H);
-    
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, W, H);
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
     
       const labels = [
-        '|00⟩',
-        '|01⟩',
-        '|10⟩',
-        '|11⟩'
+        '|000⟩',
+        '|001⟩',
+        '|010⟩',
+        '|011⟩',
+        '|100⟩',
+        '|101⟩',
+        '|110⟩',
+        '|111⟩'
       ];
     
       const probs = this.probabilities;
     
+    
       const barWidth = 60;
-      const spacing = 30;
     
-      const totalWidth =
-        4 * barWidth +
-        3 * spacing;
+      const spacing = 15;
     
-      const startX =
-        (W - totalWidth) / 2;
-    
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 8; i++) {
     
         const x =
-          startX +
-          i * (barWidth + spacing);
+          20 + i * (barWidth + spacing);
     
-        const h = probs[i] * 250;
+        const height =
+          probs[i] * 200;
     
-        ctx.fillStyle = '#2f6fed';
+        ctx.fillStyle = '#4caf50';
     
         ctx.fillRect(
           x,
-          H - h - 60,
+          250 - height,
           barWidth,
-          h
+          height
         );
     
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = '#ffffff';
     
         ctx.fillText(
           labels[i],
           x,
-          H - 30
+          270
         );
     
         ctx.fillText(
-          probs[i].toFixed(3),
+          (probs[i] * 100).toFixed(1) + '%',
           x,
-          H - h - 70
+          240 - height
         );
       }
     }
