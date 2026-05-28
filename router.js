@@ -585,7 +585,7 @@ const Manual = {
         <h1>User Manual</h1>
       
         <p>
-          This simulator demonstrates the basic behavior of a 2-qubit quantum computer.
+          This simulator demonstrates the basic behavior of a 3-qubit quantum computer.
         </p>
       
         <p>
