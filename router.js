@@ -348,11 +348,7 @@ worker: null
     this.circuit
   );
 
-  this.drawProbabilities();
-
-  this.drawDensityMatrix();
-
-  this.renderWebGL();
+  this.redrawAll();
 };
 
     const saved = await window.db.loadState();
@@ -366,10 +362,23 @@ worker: null
       this.circuit = saved.circuit;
     }
 
-    this.drawProbabilities();
+    this.redrawAll();
   },
 
   methods: {
+    redrawAll() {
+
+  this.drawProbabilities();
+
+  this.drawDensityMatrix();
+
+  this.drawEntanglement();
+
+  this.drawBlochSpheres();
+
+  this.renderWebGL();
+},
+    
     async createGHZState() {
 
   await this.applyGate('H', 0);
@@ -580,7 +589,7 @@ this.stateIm = new Float64Array(8);
           this.circuit
         );
       
-        this.drawProbabilities();
+        this.redrawAll();
 
     },
 
