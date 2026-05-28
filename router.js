@@ -1,3 +1,7 @@
+if ('gpu' in navigator) {
+  console.log('WebGPU supported');
+}
+
 const menu = `<div class="card">
         <button @click="$router.push('/')">Simulator</button>
         <button @click="$router.push('/manual')">User Manual</button>
@@ -19,6 +23,30 @@ const Home = {
 
       <div class="card">
         <canvas ref="canvas" width="400" height="400"></canvas>
+      </div>
+
+      <div class="bloch-row">
+        <canvas ref="bloch0"></canvas>
+        <canvas ref="bloch1"></canvas>
+        <canvas ref="bloch2"></canvas>
+      </div>
+
+      <div class="card">
+        <h2>Density Matrix</h2>
+        <canvas
+          ref="densityCanvas"
+          width="400"
+          height="400"
+        ></canvas>
+      </div>
+      
+      <div class="card">
+        <h2>Entanglement Graph</h2>
+        <canvas
+          ref="entanglementCanvas"
+          width="400"
+          height="250"
+        ></canvas>
       </div>
 
       <div class="card">
@@ -67,6 +95,54 @@ const Home = {
         <pre>{{ prettyState }}</pre>
 
         <p>Measurement: {{ measurement }}</p>
+      </div>
+
+      <div class="card">
+      
+        <h2>Circuit Editor</h2>
+      
+        <div class="gate-palette">
+      
+          <div
+            class="gate"
+            draggable="true"
+            @dragstart="startDrag('H')"
+          >H</div>
+      
+          <div
+            class="gate"
+            draggable="true"
+            @dragstart="startDrag('X')"
+          >X</div>
+      
+          <div
+            class="gate"
+            draggable="true"
+            @dragstart="startDrag('CNOT')"
+          >CNOT</div>
+      
+        </div>
+      
+        <div
+          class="circuit-dropzone"
+          @dragover.prevent
+          @drop="dropGate"
+        >
+      
+          <div
+            v-for="(step, index) in circuit"
+            :key="index"
+            class="circuit-step"
+          >
+            {{ step.gate }}
+          </div>
+      
+        </div>
+      
+        <button @click="runCircuit">
+          Run Circuit
+        </button>
+      
       </div>
       
       <div class="card">
@@ -223,6 +299,92 @@ const Home = {
   },
 
   methods: {
+    drawDensityMatrix() {
+
+      const canvas = this.$refs.densityCanvas;
+      const gl = canvas.getContext('webgl');
+
+      const ctx = canvas.getContext('2d');
+    
+      const size = 8;
+      const cell = 40;
+    
+      ctx.clearRect(0, 0, 400, 400);
+    
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+    
+          const value = Math.sqrt(
+            this.stateRe[i] * this.stateRe[j] +
+            this.stateIm[i] * this.stateIm[j]
+          );
+    
+          const intensity = Math.min(255, value * 255);
+    
+          ctx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
+    
+          ctx.fillRect(
+            j * cell,
+            i * cell,
+            cell,
+            cell
+          );
+        }
+      }
+    },
+        
+    async runCircuit() {
+
+      for (const step of this.circuit) {
+    
+        this.currentAnimatingGate = step;
+    
+        if (step.gate === 'CNOT') {
+    
+          await this.applyCNOT(
+            step.control,
+            step.target
+          );
+        }
+    
+        else {
+    
+          await this.applyGate(
+            step.gate,
+            step.target
+          );
+        }
+    
+        await new Promise(r => setTimeout(r, 500));
+      }
+    
+      this.currentAnimatingGate = null;
+    },
+        
+    startDrag(gate) {
+      this.draggingGate = gate;
+    },
+    
+    dropGate() {
+    
+      if (this.draggingGate === 'CNOT') {
+    
+        this.circuit.push({
+          gate: 'CNOT',
+          control: 0,
+          target: 1
+        });
+      }
+    
+      else {
+    
+        this.circuit.push({
+          gate: this.draggingGate,
+          target: 0
+        });
+      }
+    },
+        
     createBellState() {
     
       this.applyGate('H', 0);
@@ -286,6 +448,8 @@ const Home = {
     draw() {
     
       const canvas = this.$refs.canvas;
+      const gl = canvas.getContext('webgl');
+
       const ctx = canvas.getContext('2d');
     
       const W = canvas.width;
