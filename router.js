@@ -283,6 +283,14 @@ height="520"
           A two-qubit gate that conditionally flips the target qubit.
           It is one of the most important gates for creating entanglement.
         </p>
+
+        <p>
+  <strong>GHZ State</strong><br>
+  A 3-qubit entangled state where all qubits become correlated together.
+  The simulator can generate:
+  (|000⟩ + |111⟩) / √2
+  using one Hadamard gate and two CNOT gates.
+</p>
       
         <p>
           <strong>Probability Bars</strong><br>
@@ -308,6 +316,7 @@ height="520"
 
   data() {
     return {
+      webgpuSupported: 'gpu' in navigator,
       stateRe: new Float64Array([
   1,0,0,0,0,0,0,0
 ]),
@@ -466,7 +475,12 @@ worker: null
       const size = 8;
       const cell = 40;
     
-      ctx.clearRect(0, 0, 400, 400);
+      ctx.clearRect(
+  0,
+  0,
+  canvas.width,
+  canvas.height
+);
     
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -547,7 +561,7 @@ worker: null
       this.applyGate('H', 0);
     
       setTimeout(() => {
-        this.applyCNOT();
+        this.applyCNOT(0, 1);
       }, 50);
     },
 
