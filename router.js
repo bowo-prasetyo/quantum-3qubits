@@ -405,6 +405,239 @@ worker: null
   },
 
   methods: {
+    drawBlochSpheres() {
+    
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+    
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+      const W = canvas.width;
+      const H = canvas.height;
+    
+      const cx = W / 2;
+      const cy = H / 2;
+    
+      const radius = 140;
+      const perspective = 0.35;
+
+      function project(x, y, z) {
+        return {
+          x: cx + (x + y * perspective) * radius,
+          y: cy - (z + y * perspective) * radius
+        };
+      }
+    
+      //
+      // BACKGROUND
+      //
+    
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+    
+      //
+      // SPHERE
+      //
+    
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 2;
+    
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    
+      //
+      // EQUATOR
+      //
+    
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, radius, radius * 0.35, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    
+      //
+      // Z AXIS
+      //
+    
+      ctx.strokeStyle = '#444';
+
+      {
+        const p1 = project(0, 0, 1);
+        const p2 = project(0, 0, -1);
+      
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      //
+      // Y AXIS
+      //
+      
+      ctx.strokeStyle = '#888';
+      
+      {
+        const p1 = project(0, -1, 0);
+        const p2 = project(0, 1, 0);
+      
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    
+      //
+      // X AXIS
+      //
+      {
+        const p1 = project(-1, 0, 0);
+        const p2 = project(1, 0, 0);
+      
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    
+      //
+      // LABELS
+      //
+      
+      ctx.fillStyle = 'white';
+      
+      {
+        const p0 = project(0, 0, 1);
+        const p1 = project(0, 0, -1);
+      
+        ctx.fillText('|0⟩', p0.x - 10, p0.y - 10);
+        ctx.fillText('|1⟩', p1.x - 10, p1.y + 20);
+      }
+      
+      {
+        const px1 = project(1, 0, 0);
+        const px2 = project(-1, 0, 0);
+      
+        ctx.fillText('X', px1.x + 10, px1.y);
+        ctx.fillText('-X', px2.x - 25, px2.y);
+      }
+      
+      {
+        const py1 = project(0, 1, 0);
+        const py2 = project(0, -1, 0);
+      
+        ctx.fillText('Y', py1.x + 10, py1.y);
+        ctx.fillText('-Y', py2.x - 25, py2.y);
+      }
+            
+      //
+      // CURRENT QUANTUM STATE
+      //
+    
+      const alpha = this.state[0];
+      const beta = this.state[1];
+    
+      //
+      // BLOCH SPHERE COORDINATES
+      //
+    
+      const alphaMag =
+        alpha.re * alpha.re +
+        alpha.im * alpha.im;
+    
+      const betaMag =
+        beta.re * beta.re +
+        beta.im * beta.im;
+    
+      //
+      // Relative phase
+      //
+    
+      const phaseAlpha =
+        Math.atan2(alpha.im, alpha.re);
+    
+      const phaseBeta =
+        Math.atan2(beta.im, beta.re);
+    
+      const phi = phaseBeta - phaseAlpha;
+    
+      //
+      // theta
+      //
+    
+      const theta =
+        2 * Math.acos(Math.sqrt(alphaMag));
+    
+      //
+      // Bloch coordinates
+      //
+    
+      const x =
+        Math.sin(theta) * Math.cos(phi);
+    
+      const y =
+        Math.sin(theta) * Math.sin(phi);
+    
+      const z =
+        Math.cos(theta);
+    
+      //
+      // Simple 3D projection
+      //
+
+      const projected = project(x, y, z);
+      
+      const screenX = projected.x;
+      const screenY = projected.y;
+      
+      //
+      // DRAW VECTOR
+      //
+    
+      ctx.strokeStyle = '#2f6fed';
+      ctx.lineWidth = 4;
+    
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(screenX, screenY);
+      ctx.stroke();
+    
+      //
+      // VECTOR TIP
+      //
+    
+      ctx.fillStyle = '#2f6fed';
+    
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+      ctx.fill();
+    
+      //
+      // DEBUG INFO
+      //
+    
+      ctx.fillStyle = '#aaa';
+    
+      ctx.fillText(
+        `x=${x.toFixed(2)}`,
+        10,
+        20
+      );
+    
+      ctx.fillText(
+        `y=${y.toFixed(2)}`,
+        10,
+        40
+      );
+    
+      ctx.fillText(
+        `z=${z.toFixed(2)}`,
+        10,
+        60
+      );
+    
+    }
+  },
+  
     redrawAll() {
 
   this.drawProbabilities();
