@@ -212,8 +212,8 @@ height="520"
         <p>
           <strong>Quantum State</strong><br>
           The current mathematical state of the quantum system.
-          In a 2-qubit system, the state may contain combinations of:
-          |00⟩, |01⟩, |10⟩, and |11⟩ simultaneously.
+          In a 3-qubit system, the state may contain combinations of:
+          |000⟩, |001⟩ through |111⟩ simultaneously.
         </p>
       
         <p>
@@ -287,7 +287,7 @@ height="520"
         <p>
           <strong>Probability Bars</strong><br>
           The visualization shows probabilities for:
-          |00⟩, |01⟩, |10⟩, and |11⟩.
+          |000⟩, |001⟩ through |111⟩.
           Taller bars indicate higher measurement probability.
         </p>
       
@@ -300,7 +300,7 @@ height="520"
         <p>
           <strong>Measurement</strong><br>
           Shows the latest observed classical result such as:
-          |00⟩, |01⟩, |10⟩, or |11⟩.
+          |000⟩, |001⟩ through |111⟩.
         </p>
       </div>
     </div>
