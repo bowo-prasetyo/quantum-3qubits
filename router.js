@@ -1254,7 +1254,12 @@ const Home = {
     },
 
     async runCircuit() {
-
+      
+      if (!this.circuit.length) {
+        alert("Circuit is empty. Drag gates into the circuit first.");
+        return;
+      }
+      
       for (const step of this.circuit) {
 
         this.currentAnimatingGate = step;
