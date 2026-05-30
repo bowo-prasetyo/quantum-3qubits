@@ -243,6 +243,16 @@ const gates = {
       re: -1 / SQRT2,
       im: 0
     }]
+  ],
+
+  S: [
+    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
+    [{ re: 0, im: 0 }, { re: 0, im: 1 }]
+  ],
+
+  T: [
+    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
+    [{ re: 0, im: 0 }, { re: Math.cos(Math.PI/4), im: Math.sin(Math.PI/4) }]
   ]
 };
 
