@@ -171,7 +171,17 @@ const Home = {
           <div class="gate" draggable="true" @dragstart="startDrag('CNOT')">CNOT</div>
 
         </div>
-      
+
+        <div class="card">
+          <h3>Selected Qubit</h3>
+        
+          <button @click="selectedQubit = 0">Q0</button>
+          <button @click="selectedQubit = 1">Q1</button>
+          <button @click="selectedQubit = 2">Q2</button>
+        
+          <p>Current: Q{{ selectedQubit }}</p>
+        </div>
+        
         <div
           class="circuit-dropzone"
           @dragover.prevent
@@ -357,6 +367,8 @@ const Home = {
 
   data() {
     return {
+      selectedQubit: 0,
+      draggingGate: null,
       webgpuSupported: 'gpu' in navigator,
       stateRe: new Float64Array([
         1, 0, 0, 0, 0, 0, 0, 0
@@ -1285,23 +1297,33 @@ const Home = {
     },
 
     dropGate() {
-
+    
+      if (!this.draggingGate) return;
+    
       if (this.draggingGate === 'CNOT') {
-
+    
+        // default mapping using selected qubit as control
+        let control = this.selectedQubit;
+        let target = (control + 1) % 3;
+    
         this.circuit.push({
           gate: 'CNOT',
-          control: 0,
-          target: 1
+          control,
+          target
         });
+    
       } else {
-
+    
         this.circuit.push({
           gate: this.draggingGate,
-          target: 0
+          target: this.selectedQubit
         });
+    
       }
+    
+      this.draggingGate = null;
     },
-
+        
     createBellState() {
 
       this.applyGate('H', 0);
