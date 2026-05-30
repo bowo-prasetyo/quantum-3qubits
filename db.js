@@ -41,7 +41,7 @@ export async function saveState(
       im: Array.from(stateIm),
 
       circuit: JSON.parse(
-        JSON.stringify(this.circuit)
+        JSON.stringify(circuit)
       )
     });
 
