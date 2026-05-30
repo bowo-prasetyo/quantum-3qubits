@@ -1,5 +1,4 @@
 
-
 if ('gpu' in navigator) {
   console.log('WebGPU supported');
 }
