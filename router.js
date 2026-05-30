@@ -657,23 +657,6 @@ height="520"
       );
     },
         
-    getBlochVector(qubit) {
-    
-      const rho =
-        this.getReducedDensityMatrix(qubit);
-    
-      const x =
-        2 * rho.rho01Re;
-    
-      const y =
-        -2 * rho.rho01Im;
-    
-      const z =
-        rho.rho00 - rho.rho11;
-    
-      return { x, y, z };
-    },
-        
     getReducedDensityMatrix(qubit) {
     
       let rho00Re = 0;
@@ -751,98 +734,7 @@ height="520"
     
       };
     },
-        
-    drawBlochSphere(canvas, qubit) {
     
-      if (!canvas) return;
-    
-      const ctx =
-        canvas.getContext('2d');
-    
-      const W = 220;
-      const H = 220;
-    
-      canvas.width = W;
-      canvas.height = H;
-    
-      ctx.clearRect(0,0,W,H);
-    
-      const cx = W / 2;
-      const cy = H / 2;
-    
-      const radius = 80;
-    
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0,0,W,H);
-    
-      ctx.strokeStyle = '#666';
-    
-      ctx.beginPath();
-      ctx.arc(
-        cx,
-        cy,
-        radius,
-        0,
-        Math.PI * 2
-      );
-      ctx.stroke();
-    
-      const {
-        x,
-        y,
-        z
-      } = this.getBlochVector(qubit);
-    
-      const px =
-        cx + x * radius;
-    
-      const py =
-        cy - z * radius;
-    
-      ctx.strokeStyle =
-        '#2f6fed';
-    
-      ctx.lineWidth = 3;
-    
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(px, py);
-      ctx.stroke();
-    
-      ctx.fillStyle =
-        '#2f6fed';
-    
-      ctx.beginPath();
-      ctx.arc(
-        px,
-        py,
-        6,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    
-      ctx.fillStyle = '#fff';
-    
-      ctx.fillText(
-        `x=${x.toFixed(2)}`,
-        10,
-        20
-      );
-    
-      ctx.fillText(
-        `y=${y.toFixed(2)}`,
-        10,
-        40
-      );
-    
-      ctx.fillText(
-        `z=${z.toFixed(2)}`,
-        10,
-        60
-      );
-    },
-
     redrawAll() {
 
       this.drawProbabilities();
