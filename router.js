@@ -1188,7 +1188,7 @@ const Home = {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     
-      const posLoc = gl.getAttribLocation(program, "pos");
+      const posLoc = gl.getAttribLocation(this.program, "pos");
       gl.enableVertexAttribArray(posLoc);
       gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
     
@@ -1196,7 +1196,7 @@ const Home = {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.sizeBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
     
-      const sizeLoc = gl.getAttribLocation(program, "pointSize");
+      const sizeLoc = gl.getAttribLocation(this.program, "pointSize");
       gl.enableVertexAttribArray(sizeLoc);
       gl.vertexAttribPointer(sizeLoc, 1, gl.FLOAT, false, 0, 0);
     
@@ -1204,7 +1204,7 @@ const Home = {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     
-      const colorLoc = gl.getAttribLocation(program, "color");
+      const colorLoc = gl.getAttribLocation(this.program, "color");
       gl.enableVertexAttribArray(colorLoc);
       gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
             
