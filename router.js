@@ -1471,7 +1471,7 @@ const Manual = {
           <li>Press Reset</li>
           <li>Press GHZ State</li>
           <li>Observe the probability bars</li>
-          <li>Press Measure several times</li>
+          <li>Press Measure, then repeat 1 → 2 → 3 → 4</li>
         </ol>
       
         <p><strong>Expected Result:</strong></p>
