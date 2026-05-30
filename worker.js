@@ -104,28 +104,88 @@ function applyCNOT(
 const gates = {
 
   I: [
-    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
-    [{ re: 0, im: 0 }, { re: 1, im: 0 }]
+    [{
+      re: 1,
+      im: 0
+    }, {
+      re: 0,
+      im: 0
+    }],
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: 1,
+      im: 0
+    }]
   ],
 
   X: [
-    [{ re: 0, im: 0 }, { re: 1, im: 0 }],
-    [{ re: 1, im: 0 }, { re: 0, im: 0 }]
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: 1,
+      im: 0
+    }],
+    [{
+      re: 1,
+      im: 0
+    }, {
+      re: 0,
+      im: 0
+    }]
   ],
 
   Y: [
-    [{ re: 0, im: 0 }, { re: 0, im: -1 }],
-    [{ re: 0, im: 1 }, { re: 0, im: 0 }]
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: 0,
+      im: -1
+    }],
+    [{
+      re: 0,
+      im: 1
+    }, {
+      re: 0,
+      im: 0
+    }]
   ],
 
   Z: [
-    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
-    [{ re: 0, im: 0 }, { re: -1, im: 0 }]
+    [{
+      re: 1,
+      im: 0
+    }, {
+      re: 0,
+      im: 0
+    }],
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: -1,
+      im: 0
+    }]
   ],
 
   H: [
-    [{ re: 1 / SQRT2, im: 0 }, { re: 1 / SQRT2, im: 0 }],
-    [{ re: 1 / SQRT2, im: 0 }, { re: -1 / SQRT2, im: 0 }]
+    [{
+      re: 1 / SQRT2,
+      im: 0
+    }, {
+      re: 1 / SQRT2,
+      im: 0
+    }],
+    [{
+      re: 1 / SQRT2,
+      im: 0
+    }, {
+      re: -1 / SQRT2,
+      im: 0
+    }]
   ]
 };
 
