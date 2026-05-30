@@ -3,6 +3,63 @@ if ('gpu' in navigator) {
   console.log('WebGPU supported');
 }
 
+function mat4Perspective(fov, aspect, near, far) {
+  const f = 1.0 / Math.tan(fov / 2);
+  const nf = 1 / (near - far);
+
+  return new Float32Array([
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (far + near) * nf, -1,
+    0, 0, (2 * far * near) * nf, 0
+  ]);
+}
+
+function mat4Identity() {
+  return new Float32Array([
+    1,0,0,0,
+    0,1,0,0,
+    0,0,1,0,
+    0,0,0,1
+  ]);
+}
+
+function mat4RotateX(a) {
+  const c = Math.cos(a), s = Math.sin(a);
+  return new Float32Array([
+    1,0,0,0,
+    0,c,-s,0,
+    0,s,c,0,
+    0,0,0,1
+  ]);
+}
+
+function mat4RotateY(a) {
+  const c = Math.cos(a), s = Math.sin(a);
+  return new Float32Array([
+    c,0,s,0,
+    0,1,0,0,
+    -s,0,c,0,
+    0,0,0,1
+  ]);
+}
+
+function mat4Multiply(a, b) {
+  const o = new Float32Array(16);
+
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      o[i*4+j] =
+        a[i*4+0]*b[0*4+j] +
+        a[i*4+1]*b[1*4+j] +
+        a[i*4+2]*b[2*4+j] +
+        a[i*4+3]*b[3*4+j];
+    }
+  }
+
+  return o;
+}
+
 const menu = `<div class="card">
         <button @click="$router.push('/')">Simulator</button>
         <button @click="$router.push('/manual')">User Manual</button>
@@ -367,6 +424,16 @@ const Home = {
 
   data() {
     return {
+      camera: {
+        rotX: 0,
+        rotY: 0,
+        distance: 4
+      },
+      mouse: {
+        dragging: false,
+        lastX: 0,
+        lastY: 0
+      },
       selectedQubit: 0,
       draggingGate: null,
       webgpuSupported: 'gpu' in navigator,
@@ -423,6 +490,14 @@ const Home = {
     this.requestId = 0;
     this.pending = new Map();
     this.initWebGL();
+
+    const canvas = this.$refs.webglCanvas;
+
+    canvas.addEventListener('mousedown', this.onMouseDown);
+    window.addEventListener('mouseup', this.onMouseUp);
+    window.addEventListener('mousemove', this.onMouseMove);
+    canvas.addEventListener('wheel', this.onWheel);
+        
     this.renderWebGL();
     this.worker = new Worker('./worker.js');
 
@@ -472,6 +547,34 @@ const Home = {
   },
 
   methods: {
+    onMouseDown(e) {
+      this.mouse.dragging = true;
+      this.mouse.lastX = e.clientX;
+      this.mouse.lastY = e.clientY;
+    },
+    
+    onMouseUp() {
+      this.mouse.dragging = false;
+    },
+    
+    onMouseMove(e) {
+      if (!this.mouse.dragging) return;
+    
+      const dx = e.clientX - this.mouse.lastX;
+      const dy = e.clientY - this.mouse.lastY;
+    
+      this.mouse.lastX = e.clientX;
+      this.mouse.lastY = e.clientY;
+    
+      this.camera.rotY += dx * 0.01;
+      this.camera.rotX += dy * 0.01;
+    },
+    
+    onWheel(e) {
+      this.camera.distance += e.deltaY * 0.01;
+      this.camera.distance = Math.max(2, Math.min(10, this.camera.distance));
+    },
+        
     removeStep(index) {
       this.circuit.splice(index, 1);
     },
@@ -935,16 +1038,53 @@ const Home = {
     initWebGL() {
 
       const canvas = this.$refs.webglCanvas;
-
       this.gl = canvas.getContext('webgl');
 
       if (!this.gl) {
         console.error('WebGL unsupported');
         return;
       }
-
+      
       const gl = this.gl;
 
+      this.vs = `
+        attribute vec3 pos;
+        attribute float pointSize;
+        attribute vec3 color;
+        
+        uniform mat4 uModelView;
+        uniform mat4 uProjection;
+        
+        varying vec3 vColor;
+        
+        void main() {
+          vColor = color;
+
+          vec4 world = uModelView * vec4(pos, 1.0);
+  
+          gl_Position = uProjection * world;
+          gl_PointSize = pointSize / -world.z;
+        }
+      `;
+    
+      this.fs = `
+        precision mediump float;
+    
+        varying vec3 vColor;
+    
+        void main() {
+    
+          float dx = gl_PointCoord.x - 0.5;
+          float dy = gl_PointCoord.y - 0.5;
+    
+          if (dx*dx + dy*dy > 0.25) discard;
+    
+          gl_FragColor = vec4(vColor, 1.0);
+        }
+      `;
+      
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
       gl.viewport(
         0,
         0,
@@ -953,10 +1093,48 @@ const Home = {
       );
 
       gl.clearColor(0, 0, 0, 1);
+    
+      this.program = gl.createProgram();
+    
+      const vert = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vert, this.vs);
+      gl.compileShader(vert);
+    
+      const frag = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(frag, this.fs);
+      gl.compileShader(frag);
+    
+      gl.attachShader(program, vert);
+      gl.attachShader(program, frag);
+      gl.linkProgram(program);
+
+      this.posBuffer = gl.createBuffer();
+      this.sizeBuffer = gl.createBuffer();
+      this.colorBuffer = gl.createBuffer();
+
     },
     
     renderWebGL() {
 
+      const canvas = this.$refs.webglCanvas;
+      const aspect = canvas.width / canvas.height;
+      
+      const projection = mat4Perspective(
+        Math.PI / 3,
+        aspect,
+        0.1,
+        100
+      );
+      
+      const rx = mat4RotateX(this.camera.rotX);
+      const ry = mat4RotateY(this.camera.rotY);
+      
+      let view = mat4Identity();
+      view[14] = -this.camera.distance; // camera pull back
+      
+      let rotation = mat4Multiply(ry, rx);
+      let modelView = mat4Multiply(view, rotation);
+      
       const gl = this.gl;
       if (!gl) return;
     
@@ -996,60 +1174,18 @@ const Home = {
         sizes.push(5 + prob * 60);
     
         colors.push(r, g, b);
-      }
-    
-      const vs = `
-        attribute vec3 pos;
-        attribute float pointSize;
-        attribute vec3 color;
-    
-        varying vec3 vColor;
-    
-        void main() {
-    
-          vColor = color;
-    
-          gl_Position =
-            vec4(pos * 0.6, 1.0);
-    
-          gl_PointSize = pointSize;
-        }
-      `;
-    
-      const fs = `
-        precision mediump float;
-    
-        varying vec3 vColor;
-    
-        void main() {
-    
-          float dx = gl_PointCoord.x - 0.5;
-          float dy = gl_PointCoord.y - 0.5;
-    
-          if (dx*dx + dy*dy > 0.25) discard;
-    
-          gl_FragColor = vec4(vColor, 1.0);
-        }
-      `;
-    
-      const program = gl.createProgram();
-    
-      const vert = gl.createShader(gl.VERTEX_SHADER);
-      gl.shaderSource(vert, vs);
-      gl.compileShader(vert);
-    
-      const frag = gl.createShader(gl.FRAGMENT_SHADER);
-      gl.shaderSource(frag, fs);
-      gl.compileShader(frag);
-    
-      gl.attachShader(program, vert);
-      gl.attachShader(program, frag);
-      gl.linkProgram(program);
-      gl.useProgram(program);
-    
+      }  
+      
+      gl.useProgram(this.program);
+
+      const uMV = gl.getUniformLocation(this.program, "uModelView");
+      const uP = gl.getUniformLocation(this.program, "uProjection");
+      
+      gl.uniformMatrix4fv(uMV, false, modelView);
+      gl.uniformMatrix4fv(uP, false, projection);
+            
       // POSITION
-      const posBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     
       const posLoc = gl.getAttribLocation(program, "pos");
@@ -1057,8 +1193,7 @@ const Home = {
       gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
     
       // SIZE
-      const sizeBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.sizeBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
     
       const sizeLoc = gl.getAttribLocation(program, "pointSize");
@@ -1066,84 +1201,14 @@ const Home = {
       gl.vertexAttribPointer(sizeLoc, 1, gl.FLOAT, false, 0, 0);
     
       // COLOR
-      const colorBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     
       const colorLoc = gl.getAttribLocation(program, "color");
       gl.enableVertexAttribArray(colorLoc);
       gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
-
-      const axisVertices = [
-        // X axis (red conceptually)
-        -1, 0, 0,
-         1, 0, 0,
-      
-        // Y axis (green)
-        0, -1, 0,
-        0,  1, 0,
-      
-        // Z axis (blue)
-        0, 0, -1,
-        0, 0,  1
-      ];
-
-      const axisVS = `
-        attribute vec3 pos;
-      
-        void main() {
-          gl_Position = vec4(pos * 0.6, 1.0);
-        }
-      `;
-      
-      const axisFS = `
-        precision mediump float;
-        uniform vec3 color;
-      
-        void main() {
-          gl_FragColor = vec4(color, 1.0);
-        }
-      `;
-
-      const axisProgram = gl.createProgram();
-
-      const axisVert = gl.createShader(gl.VERTEX_SHADER);
-      gl.shaderSource(axisVert, axisVS);
-      gl.compileShader(axisVert);
-      
-      const axisFrag = gl.createShader(gl.FRAGMENT_SHADER);
-      gl.shaderSource(axisFrag, axisFS);
-      gl.compileShader(axisFrag);
-      
-      gl.attachShader(axisProgram, axisVert);
-      gl.attachShader(axisProgram, axisFrag);
-      gl.linkProgram(axisProgram);
-
-      const axisBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
             
       gl.drawArrays(gl.POINTS, 0, 8);
-
-      gl.useProgram(axisProgram);
-
-      const axisPosLoc = gl.getAttribLocation(axisProgram, "pos");
-      gl.enableVertexAttribArray(axisPosLoc);
-      
-      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
-      gl.vertexAttribPointer(axisPosLoc, 3, gl.FLOAT, false, 0, 0);
-      
-      // X axis (red)
-      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 1.0, 0.2, 0.2);
-      gl.drawArrays(gl.LINES, 0, 2);
-      
-      // Y axis (green)
-      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 1.0, 0.2);
-      gl.drawArrays(gl.LINES, 2, 2);
-      
-      // Z axis (blue)
-      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 0.4, 1.0);
-      gl.drawArrays(gl.LINES, 4, 2);
     },
     
     drawDensityMatrix() {
