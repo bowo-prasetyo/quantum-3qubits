@@ -1,4 +1,4 @@
-const DB_NAME = 'quantum-db-2';
+const DB_NAME = 'quantum-db-3';
 const STORE_NAME = 'states';
 const KEY = 'qubit';
 
@@ -8,7 +8,7 @@ function openDB() {
 
     request.onupgradeneeded = () => {
       const db = request.result;
-      db.createObjectStore(STORE_NAME);
+      db.createObjectStore(STORE_NAME, { keyPath: KEY });
     };
 
     request.onsuccess = () => resolve(request.result);
@@ -40,7 +40,9 @@ export async function saveState(
 
       im: Array.from(stateIm),
 
-      circuit
+      circuit: JSON.parse(
+        JSON.stringify(this.circuit)
+      )
     });
 
     tx.oncomplete = () => resolve();
