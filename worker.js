@@ -1,5 +1,62 @@
 const SQRT2 = Math.sqrt(2);
 
+function measureState(re, im, qubitCount) {
+
+  const probs = [];
+
+  let total = 0;
+
+  for (let i = 0; i < re.length; i++) {
+
+    const p =
+      re[i] * re[i] +
+      im[i] * im[i];
+
+    probs.push(p);
+
+    total += p;
+  }
+
+  const r = Math.random();
+
+  let cumulative = 0;
+  let measuredIndex = 0;
+
+  for (let i = 0; i < probs.length; i++) {
+
+    cumulative += probs[i] / total;
+
+    if (r <= cumulative) {
+
+      measuredIndex = i;
+
+      break;
+    }
+  }
+
+  const collapsedRe =
+    new Float64Array(re.length);
+
+  const collapsedIm =
+    new Float64Array(im.length);
+
+  collapsedRe[measuredIndex] = 1;
+
+  return {
+
+    re: collapsedRe,
+
+    im: collapsedIm,
+
+    measured:
+      '|' +
+      measuredIndex
+        .toString(2)
+        .padStart(qubitCount, '0') +
+      '⟩'
+  };
+}
+
 function probability(re, im) {
   return re * re + im * im;
 }
@@ -202,6 +259,24 @@ self.onmessage = (e) => {
     qubitCount
   } = e.data;
 
+  if (type === 'measure') {
+
+  const result = measureState(
+    re,
+    im,
+    qubitCount
+  );
+
+  self.postMessage({
+    re: result.re,
+    im: result.im,
+    measured: result.measured
+  }, [
+    result.re.buffer,
+    result.im.buffer
+  ]);
+}
+  
   if (type === 'gate') {
 
     const result = applySingleQubitGate(
