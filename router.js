@@ -938,7 +938,6 @@ height="520"
       );
     }
   }
-}
 };
 
 const Manual = {
