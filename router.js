@@ -77,7 +77,7 @@ const Home = {
       </div>
       
       <div class="card">
-        <h2>Entanglement Graph</h2>
+        <h2>Correlation Graph</h2>
         <canvas
           ref="entanglementCanvas"
           width="600"
