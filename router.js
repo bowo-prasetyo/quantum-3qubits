@@ -406,235 +406,207 @@ height="520"
 
   methods: {
     drawBlochSpheres() {
-
-      const canvas = this.$refs.canvas;
-      const ctx = canvas.getContext('2d');
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const W = canvas.width;
-      const H = canvas.height;
-
+    
+      this.drawBlochSphere(
+        this.$refs.bloch0,
+        0
+      );
+    
+      this.drawBlochSphere(
+        this.$refs.bloch1,
+        1
+      );
+    
+      this.drawBlochSphere(
+        this.$refs.bloch2,
+        2
+      );
+    },
+        
+    getBlochVector(qubit) {
+    
+      const rho =
+        this.getReducedDensityMatrix(qubit);
+    
+      const x =
+        2 * rho.rho01Re;
+    
+      const y =
+        -2 * rho.rho01Im;
+    
+      const z =
+        rho.rho00 - rho.rho11;
+    
+      return { x, y, z };
+    },
+        
+    getReducedDensityMatrix(qubit) {
+    
+      let rho00Re = 0;
+      let rho11Re = 0;
+    
+      let rho01Re = 0;
+      let rho01Im = 0;
+    
+      for (let i = 0; i < 8; i++) {
+    
+        const bitI = (i >> (2 - qubit)) & 1;
+    
+        for (let j = 0; j < 8; j++) {
+    
+          const bitJ = (j >> (2 - qubit)) & 1;
+    
+          //
+          // Trace out all other qubits
+          //
+    
+          let equal = true;
+    
+          for (let k = 0; k < 3; k++) {
+    
+            if (k === qubit) continue;
+    
+            const bi = (i >> (2 - k)) & 1;
+            const bj = (j >> (2 - k)) & 1;
+    
+            if (bi !== bj) {
+              equal = false;
+              break;
+            }
+          }
+    
+          if (!equal) continue;
+    
+          const ar = this.stateRe[i];
+          const ai = this.stateIm[i];
+    
+          const br = this.stateRe[j];
+          const bi = -this.stateIm[j];
+    
+          const re =
+            ar * br -
+            ai * bi;
+    
+          const im =
+            ar * bi +
+            ai * br;
+    
+          if (bitI === 0 && bitJ === 0)
+            rho00Re += re;
+    
+          else if (bitI === 1 && bitJ === 1)
+            rho11Re += re;
+    
+          else if (bitI === 0 && bitJ === 1) {
+    
+            rho01Re += re;
+            rho01Im += im;
+          }
+        }
+      }
+    
+      return {
+    
+        rho00: rho00Re,
+    
+        rho11: rho11Re,
+    
+        rho01Re,
+    
+        rho01Im
+    
+      };
+    },
+        
+    drawBlochSphere(canvas, qubit) {
+    
+      if (!canvas) return;
+    
+      const ctx =
+        canvas.getContext('2d');
+    
+      const W = 220;
+      const H = 220;
+    
+      canvas.width = W;
+      canvas.height = H;
+    
+      ctx.clearRect(0,0,W,H);
+    
       const cx = W / 2;
       const cy = H / 2;
-
-      const radius = 140;
-      const perspective = 0.35;
-
-      function project(x, y, z) {
-        return {
-          x: cx + (x + y * perspective) * radius,
-          y: cy - (z + y * perspective) * radius
-        };
-      }
-
-      //
-      // BACKGROUND
-      //
-
+    
+      const radius = 80;
+    
       ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, W, H);
-
-      //
-      // SPHERE
-      //
-
+      ctx.fillRect(0,0,W,H);
+    
       ctx.strokeStyle = '#666';
-      ctx.lineWidth = 2;
-
+    
       ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.arc(
+        cx,
+        cy,
+        radius,
+        0,
+        Math.PI * 2
+      );
       ctx.stroke();
-
-      //
-      // EQUATOR
-      //
-
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, radius, radius * 0.35, 0, 0, Math.PI * 2);
-      ctx.stroke();
-
-      //
-      // Z AXIS
-      //
-
-      ctx.strokeStyle = '#444';
-
-      {
-        const p1 = project(0, 0, 1);
-        const p2 = project(0, 0, -1);
-
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-      }
-
-      //
-      // Y AXIS
-      //
-
-      ctx.strokeStyle = '#888';
-
-      {
-        const p1 = project(0, -1, 0);
-        const p2 = project(0, 1, 0);
-
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-      }
-
-      //
-      // X AXIS
-      //
-      {
-        const p1 = project(-1, 0, 0);
-        const p2 = project(1, 0, 0);
-
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-      }
-
-      //
-      // LABELS
-      //
-
-      ctx.fillStyle = 'white';
-
-      {
-        const p0 = project(0, 0, 1);
-        const p1 = project(0, 0, -1);
-
-        ctx.fillText('|0⟩', p0.x - 10, p0.y - 10);
-        ctx.fillText('|1⟩', p1.x - 10, p1.y + 20);
-      }
-
-      {
-        const px1 = project(1, 0, 0);
-        const px2 = project(-1, 0, 0);
-
-        ctx.fillText('X', px1.x + 10, px1.y);
-        ctx.fillText('-X', px2.x - 25, px2.y);
-      }
-
-      {
-        const py1 = project(0, 1, 0);
-        const py2 = project(0, -1, 0);
-
-        ctx.fillText('Y', py1.x + 10, py1.y);
-        ctx.fillText('-Y', py2.x - 25, py2.y);
-      }
-
-      //
-      // CURRENT QUANTUM STATE
-      //
-
-      const alpha = this.state[0];
-      const beta = this.state[1];
-
-      //
-      // BLOCH SPHERE COORDINATES
-      //
-
-      const alphaMag =
-        alpha.re * alpha.re +
-        alpha.im * alpha.im;
-
-      const betaMag =
-        beta.re * beta.re +
-        beta.im * beta.im;
-
-      //
-      // Relative phase
-      //
-
-      const phaseAlpha =
-        Math.atan2(alpha.im, alpha.re);
-
-      const phaseBeta =
-        Math.atan2(beta.im, beta.re);
-
-      const phi = phaseBeta - phaseAlpha;
-
-      //
-      // theta
-      //
-
-      const theta =
-        2 * Math.acos(Math.sqrt(alphaMag));
-
-      //
-      // Bloch coordinates
-      //
-
-      const x =
-        Math.sin(theta) * Math.cos(phi);
-
-      const y =
-        Math.sin(theta) * Math.sin(phi);
-
-      const z =
-        Math.cos(theta);
-
-      //
-      // Simple 3D projection
-      //
-
-      const projected = project(x, y, z);
-
-      const screenX = projected.x;
-      const screenY = projected.y;
-
-      //
-      // DRAW VECTOR
-      //
-
-      ctx.strokeStyle = '#2f6fed';
-      ctx.lineWidth = 4;
-
+    
+      const {
+        x,
+        y,
+        z
+      } = this.getBlochVector(qubit);
+    
+      const px =
+        cx + x * radius;
+    
+      const py =
+        cy - z * radius;
+    
+      ctx.strokeStyle =
+        '#2f6fed';
+    
+      ctx.lineWidth = 3;
+    
       ctx.beginPath();
       ctx.moveTo(cx, cy);
-      ctx.lineTo(screenX, screenY);
+      ctx.lineTo(px, py);
       ctx.stroke();
-
-      //
-      // VECTOR TIP
-      //
-
-      ctx.fillStyle = '#2f6fed';
-
+    
+      ctx.fillStyle =
+        '#2f6fed';
+    
       ctx.beginPath();
-      ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+      ctx.arc(
+        px,
+        py,
+        6,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
-
-      //
-      // DEBUG INFO
-      //
-
-      ctx.fillStyle = '#aaa';
-
+    
+      ctx.fillStyle = '#fff';
+    
       ctx.fillText(
         `x=${x.toFixed(2)}`,
         10,
         20
       );
-
+    
       ctx.fillText(
         `y=${y.toFixed(2)}`,
         10,
         40
       );
-
+    
       ctx.fillText(
         `z=${z.toFixed(2)}`,
         10,
         60
       );
-
     },
 
     redrawAll() {
