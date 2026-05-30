@@ -20,58 +20,58 @@ const Home = {
           Minimal quantum computer simulator that demonstrates the basic behavior of 3 quantum bits (qubits).
         </p>
       </div>
-
-<div class="card">
-  <h2>System Information</h2>
-
-  <p>Qubits: 3</p>
-
-  <p>Hilbert Space Size: 8</p>
-
-  <p>WebGL: Enabled</p>
-
-  <p>WebGPU:
-    {{ webgpuSupported ? 'Supported' : 'Not Supported' }}
-  </p>
-</div>
+      
+      <div class="card">
+        <h2>System Information</h2>
+      
+        <p>Qubits: 3</p>
+      
+        <p>Hilbert Space Size: 8</p>
+      
+        <p>WebGL: Enabled</p>
+      
+        <p>WebGPU:
+          {{ webgpuSupported ? 'Supported' : 'Not Supported' }}
+        </p>
+      </div>
 
       <div class="card">
-
-  <h2>Probability Visualization</h2>
-
-  <canvas
-    ref="probabilityCanvas"
-    width="800"
-    height="300"
-  ></canvas>
-
-</div>
+      
+        <h2>Probability Visualization</h2>
+      
+        <canvas
+          ref="probabilityCanvas"
+          width="800"
+          height="300"
+        ></canvas>
+      
+      </div>
 
       <div class="bloch-row">
-
-  <div>
-    <p>Qubit 0</p>
-    <canvas ref="bloch0"></canvas>
-  </div>
-
-  <div>
-    <p>Qubit 1</p>
-    <canvas ref="bloch1"></canvas>
-  </div>
-
-  <div>
-    <p>Qubit 2</p>
-    <canvas ref="bloch2"></canvas>
-  </div>
-
-</div>
+      
+        <div>
+          <p>Qubit 0</p>
+          <canvas ref="bloch0"></canvas>
+        </div>
+      
+        <div>
+          <p>Qubit 1</p>
+          <canvas ref="bloch1"></canvas>
+        </div>
+      
+        <div>
+          <p>Qubit 2</p>
+          <canvas ref="bloch2"></canvas>
+        </div>
+      
+      </div>
 
       <div class="card">
         <h2>Density Matrix</h2>
         <canvas
           ref="densityCanvas"
           width="520"
-height="520"
+          height="520"
         ></canvas>
       </div>
       
@@ -114,14 +114,14 @@ height="520"
         <button @click="applyGate('S', 1)">S</button>
         <button @click="applyGate('T', 1)">T</button>
 
-      <h3>Qubit 2</h3>
+        <h3>Qubit 2</h3>
 
-<button @click="applyGate('H', 2)">H</button>
-<button @click="applyGate('X', 2)">X</button>
-<button @click="applyGate('Y', 2)">Y</button>
-<button @click="applyGate('Z', 2)">Z</button>
-<button @click="applyGate('S', 2)">S</button>
-<button @click="applyGate('T', 2)">T</button>
+        <button @click="applyGate('H', 2)">H</button>
+        <button @click="applyGate('X', 2)">X</button>
+        <button @click="applyGate('Y', 2)">Y</button>
+        <button @click="applyGate('Z', 2)">Z</button>
+        <button @click="applyGate('S', 2)">S</button>
+        <button @click="applyGate('T', 2)">T</button>
         <hr>
       
         <button @click="applyCNOT(0, 1)">
@@ -132,9 +132,9 @@ height="520"
           Create Bell Pair
         </button>
 
-      <button @click="createGHZState">
-  GHZ State
-</button>
+        <button @click="createGHZState">
+          GHZ State
+        </button>
 
         <button @click="measure">
           Measure
@@ -203,160 +203,161 @@ height="520"
       </div>
       
       <div class="card">
-  <h2>Quantum Concepts</h2>
-
-  <p>
-    <strong>Quantum State</strong><br>
-    The current mathematical state of the 3-qubit quantum system.
-    Unlike a classical system that stores only one value,
-    a quantum state can contain all eight basis states simultaneously:
-    |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ and |111⟩.
-  </p>
-
-  <p>
-    <strong>Qubits</strong><br>
-    A qubit is the quantum equivalent of a classical bit.
-    While a classical bit can only be 0 or 1,
-    a qubit may exist in a combination of both states until measured.
-  </p>
-
-  <p>
-    <strong>Superposition</strong><br>
-    A quantum system can occupy multiple basis states simultaneously.
-    The amplitudes determine the probability of observing each state.
-    Measurement collapses the superposition into one classical result.
-  </p>
-
-  <p>
-    <strong>Quantum Amplitudes</strong><br>
-    Each basis state has a complex-valued amplitude.
-    Probabilities are calculated from the squared magnitude of these amplitudes.
-    The total probability across all basis states always equals 100%.
-  </p>
-
-  <p>
-    <strong>Entanglement</strong><br>
-    Multiple qubits can become correlated in ways that classical systems cannot reproduce.
-    Entangled qubits must be described as one combined quantum system rather than independent particles.
-  </p>
-
-  <p>
-    <strong>Bell State</strong><br>
-    A Bell state is a two-qubit entangled state.
-    The simulator can generate:
-    (|00⟩ + |11⟩) / √2
-    using a Hadamard gate followed by a CNOT gate.
-  </p>
-
-  <p>
-    <strong>GHZ State</strong><br>
-    A Greenberger–Horne–Zeilinger (GHZ) state is a three-qubit entangled state.
-    The simulator can generate:
-    (|000⟩ + |111⟩) / √2
-    using one Hadamard gate and two CNOT gates.
-    In a GHZ state, all three qubits become strongly correlated.
-  </p>
-
-  <p>
-    <strong>Identity Gate (I)</strong><br>
-    Leaves the selected qubit unchanged.
-    The quantum state remains exactly the same.
-  </p>
-
-  <p>
-    <strong>Hadamard Gate (H)</strong><br>
-    Creates superposition.
-    It transforms a definite classical state into a quantum mixture of possibilities.
-  </p>
-
-  <p>
-    <strong>Pauli-X Gate (X)</strong><br>
-    Similar to a classical NOT gate.
-    It flips |0⟩ into |1⟩ and |1⟩ into |0⟩.
-  </p>
-
-  <p>
-    <strong>Pauli-Y Gate (Y)</strong><br>
-    Flips the qubit while introducing a complex phase.
-    It combines bit-flip and phase effects.
-  </p>
-
-  <p>
-    <strong>Pauli-Z Gate (Z)</strong><br>
-    Changes the quantum phase without directly changing measurement probabilities.
-    This phase can affect future interference patterns.
-  </p>
-
-  <p>
-    <strong>Phase Gate (S)</strong><br>
-    Applies a 90-degree phase rotation.
-    It is commonly used for phase manipulation and interference effects.
-  </p>
-
-  <p>
-    <strong>π/8 Gate (T)</strong><br>
-    Applies a 45-degree phase rotation.
-    The T gate is an important component of universal quantum computation.
-  </p>
-
-  <p>
-    <strong>CNOT Gate</strong><br>
-    A controlled-NOT operation involving two qubits.
-    The target qubit flips only when the control qubit is in state |1⟩.
-    CNOT is one of the primary tools for creating entanglement.
-  </p>
-
-  <p>
-    <strong>Density Matrix</strong><br>
-    The density matrix provides a complete description of the quantum system.
-    It contains both probability information and phase relationships between basis states.
-    Pure states and mixed states can both be represented using density matrices.
-  </p>
-
-  <p>
-    <strong>Reduced Density Matrix</strong><br>
-    Each Bloch sphere is computed from a reduced density matrix obtained by tracing out the other qubits.
-    This shows the local state of an individual qubit even when it is entangled with the rest of the system.
-  </p>
-
-  <p>
-    <strong>Bloch Sphere</strong><br>
-    The Bloch sphere is a geometric representation of a single qubit.
-    The vector inside the sphere indicates the qubit's quantum state.
-    Pure states lie on the surface, while entangled or mixed states move toward the center.
-  </p>
-
-  <p>
-    <strong>Probability Visualization</strong><br>
-    The probability chart displays the measurement probability of all eight basis states.
-    Taller bars indicate a higher chance of observing that state during measurement.
-  </p>
-
-  <p>
-    <strong>Entanglement Graph</strong><br>
-    The entanglement graph visualizes correlations between qubits.
-    Stronger connections indicate greater quantum correlation between pairs of qubits.
-  </p>
-
-  <p>
-    <strong>WebGL Visualization</strong><br>
-    The WebGL view uses GPU acceleration to render quantum-state visualizations more efficiently.
-    This enables smoother animation and larger future simulations.
-  </p>
-
-  <p>
-    <strong>Measurement</strong><br>
-    Measuring the quantum system collapses the superposition into one of the eight basis states.
-    The outcome appears according to the probability distribution of the current quantum state.
-  </p>
-
-  <p>
-    <strong>Measurement Result</strong><br>
-    The latest observed classical state is displayed here, such as:
-    |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ or |111⟩.
-  </p>
-
-</div>
+        
+        <h2>Quantum Concepts</h2>
+      
+        <p>
+          <strong>Quantum State</strong><br>
+          The current mathematical state of the 3-qubit quantum system.
+          Unlike a classical system that stores only one value,
+          a quantum state can contain all eight basis states simultaneously:
+          |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ and |111⟩.
+        </p>
+      
+        <p>
+          <strong>Qubits</strong><br>
+          A qubit is the quantum equivalent of a classical bit.
+          While a classical bit can only be 0 or 1,
+          a qubit may exist in a combination of both states until measured.
+        </p>
+      
+        <p>
+          <strong>Superposition</strong><br>
+          A quantum system can occupy multiple basis states simultaneously.
+          The amplitudes determine the probability of observing each state.
+          Measurement collapses the superposition into one classical result.
+        </p>
+      
+        <p>
+          <strong>Quantum Amplitudes</strong><br>
+          Each basis state has a complex-valued amplitude.
+          Probabilities are calculated from the squared magnitude of these amplitudes.
+          The total probability across all basis states always equals 100%.
+        </p>
+      
+        <p>
+          <strong>Entanglement</strong><br>
+          Multiple qubits can become correlated in ways that classical systems cannot reproduce.
+          Entangled qubits must be described as one combined quantum system rather than independent particles.
+        </p>
+      
+        <p>
+          <strong>Bell State</strong><br>
+          A Bell state is a two-qubit entangled state.
+          The simulator can generate:
+          (|00⟩ + |11⟩) / √2
+          using a Hadamard gate followed by a CNOT gate.
+        </p>
+      
+        <p>
+          <strong>GHZ State</strong><br>
+          A Greenberger–Horne–Zeilinger (GHZ) state is a three-qubit entangled state.
+          The simulator can generate:
+          (|000⟩ + |111⟩) / √2
+          using one Hadamard gate and two CNOT gates.
+          In a GHZ state, all three qubits become strongly correlated.
+        </p>
+      
+        <p>
+          <strong>Identity Gate (I)</strong><br>
+          Leaves the selected qubit unchanged.
+          The quantum state remains exactly the same.
+        </p>
+      
+        <p>
+          <strong>Hadamard Gate (H)</strong><br>
+          Creates superposition.
+          It transforms a definite classical state into a quantum mixture of possibilities.
+        </p>
+      
+        <p>
+          <strong>Pauli-X Gate (X)</strong><br>
+          Similar to a classical NOT gate.
+          It flips |0⟩ into |1⟩ and |1⟩ into |0⟩.
+        </p>
+      
+        <p>
+          <strong>Pauli-Y Gate (Y)</strong><br>
+          Flips the qubit while introducing a complex phase.
+          It combines bit-flip and phase effects.
+        </p>
+      
+        <p>
+          <strong>Pauli-Z Gate (Z)</strong><br>
+          Changes the quantum phase without directly changing measurement probabilities.
+          This phase can affect future interference patterns.
+        </p>
+      
+        <p>
+          <strong>Phase Gate (S)</strong><br>
+          Applies a 90-degree phase rotation.
+          It is commonly used for phase manipulation and interference effects.
+        </p>
+      
+        <p>
+          <strong>π/8 Gate (T)</strong><br>
+          Applies a 45-degree phase rotation.
+          The T gate is an important component of universal quantum computation.
+        </p>
+      
+        <p>
+          <strong>CNOT Gate</strong><br>
+          A controlled-NOT operation involving two qubits.
+          The target qubit flips only when the control qubit is in state |1⟩.
+          CNOT is one of the primary tools for creating entanglement.
+        </p>
+      
+        <p>
+          <strong>Density Matrix</strong><br>
+          The density matrix provides a complete description of the quantum system.
+          It contains both probability information and phase relationships between basis states.
+          Pure states and mixed states can both be represented using density matrices.
+        </p>
+      
+        <p>
+          <strong>Reduced Density Matrix</strong><br>
+          Each Bloch sphere is computed from a reduced density matrix obtained by tracing out the other qubits.
+          This shows the local state of an individual qubit even when it is entangled with the rest of the system.
+        </p>
+      
+        <p>
+          <strong>Bloch Sphere</strong><br>
+          The Bloch sphere is a geometric representation of a single qubit.
+          The vector inside the sphere indicates the qubit's quantum state.
+          Pure states lie on the surface, while entangled or mixed states move toward the center.
+        </p>
+      
+        <p>
+          <strong>Probability Visualization</strong><br>
+          The probability chart displays the measurement probability of all eight basis states.
+          Taller bars indicate a higher chance of observing that state during measurement.
+        </p>
+      
+        <p>
+          <strong>Entanglement Graph</strong><br>
+          The entanglement graph visualizes correlations between qubits.
+          Stronger connections indicate greater quantum correlation between pairs of qubits.
+        </p>
+      
+        <p>
+          <strong>WebGL Visualization</strong><br>
+          The WebGL view uses GPU acceleration to render quantum-state visualizations more efficiently.
+          This enables smoother animation and larger future simulations.
+        </p>
+      
+        <p>
+          <strong>Measurement</strong><br>
+          Measuring the quantum system collapses the superposition into one of the eight basis states.
+          The outcome appears according to the probability distribution of the current quantum state.
+        </p>
+      
+        <p>
+          <strong>Measurement Result</strong><br>
+          The latest observed classical state is displayed here, such as:
+          |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ or |111⟩.
+        </p>
+      
+      </div>
     </div>
   `,
 
@@ -1058,50 +1059,50 @@ const Manual = {
   template: `
     <div class="container">
       ${menu}
+            
+      <div class="card">
+        <h1>User Manual</h1>
       
-<div class="card">
-  <h1>User Manual</h1>
-
-  <p>
-    This simulator demonstrates the basic behavior of a 3-qubit quantum computer.
-  </p>
-
-  <p>
-    Unlike classical bits that can only be 0 or 1,
-    quantum bits (qubits) can exist in superposition,
-    can accumulate quantum phase,
-    and can become entangled with one another.
-  </p>
-
-  <p>
-    A 3-qubit system contains eight basis states:
-  </p>
-
-  <p>
-    |000⟩, |001⟩, |010⟩, |011⟩,
-    |100⟩, |101⟩, |110⟩ and |111⟩.
-  </p>
-
-  <p>
-    The simulator allows you to experiment with:
-  </p>
-
-  <ul>
-    <li>Single-qubit gates</li>
-    <li>Quantum superposition</li>
-    <li>Quantum phase</li>
-    <li>Measurement collapse</li>
-    <li>Two-qubit entanglement</li>
-    <li>Three-qubit entanglement</li>
-    <li>Bell states</li>
-    <li>GHZ states</li>
-    <li>CNOT operations</li>
-    <li>Reduced density matrices</li>
-    <li>Bloch sphere visualization</li>
-    <li>Density matrix visualization</li>
-    <li>Entanglement visualization</li>
-  </ul>
-</div>
+        <p>
+          This simulator demonstrates the basic behavior of a 3-qubit quantum computer.
+        </p>
+      
+        <p>
+          Unlike classical bits that can only be 0 or 1,
+          quantum bits (qubits) can exist in superposition,
+          can accumulate quantum phase,
+          and can become entangled with one another.
+        </p>
+      
+        <p>
+          A 3-qubit system contains eight basis states:
+        </p>
+      
+        <p>
+          |000⟩, |001⟩, |010⟩, |011⟩,
+          |100⟩, |101⟩, |110⟩ and |111⟩.
+        </p>
+      
+        <p>
+          The simulator allows you to experiment with:
+        </p>
+      
+        <ul>
+          <li>Single-qubit gates</li>
+          <li>Quantum superposition</li>
+          <li>Quantum phase</li>
+          <li>Measurement collapse</li>
+          <li>Two-qubit entanglement</li>
+          <li>Three-qubit entanglement</li>
+          <li>Bell states</li>
+          <li>GHZ states</li>
+          <li>CNOT operations</li>
+          <li>Reduced density matrices</li>
+          <li>Bloch sphere visualization</li>
+          <li>Density matrix visualization</li>
+          <li>Entanglement visualization</li>
+        </ul>
+      </div>
       
       <div class="card">
         <h2>Use Case 1 — Classical Bit Flip</h2>
@@ -1135,10 +1136,10 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-  The measurement frequently becomes |100⟩ because
-  qubit 0 was flipped from 0 to 1 while
-  qubits 1 and 2 remain unchanged.
-</p>
+          The measurement frequently becomes |100⟩ because
+          qubit 0 was flipped from 0 to 1 while
+          qubits 1 and 2 remain unchanged.
+        </p>
       </div>
       
       <div class="card">
@@ -1173,9 +1174,9 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-  Measurements randomly become either |000⟩ or |100⟩
-  with approximately equal probability.
-</p>
+          Measurements randomly become either |000⟩ or |100⟩
+          with approximately equal probability.
+        </p>
       </div>
       
       <div class="card">
@@ -1248,8 +1249,8 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-  The system returns to the original |000⟩ state.
-</p>
+          The system returns to the original |000⟩ state.
+        </p>
       </div>
       
       <div class="card">
@@ -1292,74 +1293,74 @@ const Manual = {
       </div>
 
       <div class="card">
-  <h2>Use Case 6 — Bell State Creation</h2>
-
-  <p>
-    This demonstrates quantum entanglement.
-  </p>
-
-  <p><strong>What Is Entanglement?</strong></p>
-
-  <p>
-    Entanglement happens when two qubits become strongly connected.
-    After entanglement, measuring one qubit affects the overall system
-    and reveals information about the other qubit as well.
-  </p>
-
-  <p>
-    In this simulator, the two qubits become linked so that
-    they tend to produce matching measurement results.
-  </p>
-
-  <p><strong>Objective:</strong></p>
-
-  <p>
-    Create one of the most famous entangled quantum states:
-    a Bell state.
-  </p>
-
-  <p><strong>Why This Matters:</strong></p>
-
-  <p>
-    Entanglement is one of the defining features of quantum computing
-    and enables many quantum algorithms and communication protocols.
-  </p>
-
-  <p>
-    Unlike ordinary classical systems,
-    entangled quantum systems behave as a single combined system
-    even when consisting of multiple qubits.
-  </p>
-
-  <p><strong>Steps:</strong></p>
-
-  <ol>
-    <li>Press Reset</li>
-    <li>Press H on Qubit 0</li>
-    <li>Press CNOT</li>
-    <li>Press Measure, then repeat 1 → 2 → 3 → 4</li>
-  </ol>
-
-  <p><strong>Expected Result:</strong></p>
-
-<p>
-  Measurements become either |000⟩ or |110⟩,
-  while most other basis states rarely appear.
-</p>
-
-<p>
-  Qubit 0 and qubit 1 become entangled,
-  while qubit 2 remains in the |0⟩ state.
-</p>
-
-<p>
-  The generated Bell state is:
-</p>
-
-<p>
-  (|000⟩ + |110⟩) / √2
-</p>
-</div>
+        <h2>Use Case 6 — Bell State Creation</h2>
+      
+        <p>
+          This demonstrates quantum entanglement.
+        </p>
+      
+        <p><strong>What Is Entanglement?</strong></p>
+      
+        <p>
+          Entanglement happens when two qubits become strongly connected.
+          After entanglement, measuring one qubit affects the overall system
+          and reveals information about the other qubit as well.
+        </p>
+      
+        <p>
+          In this simulator, the two qubits become linked so that
+          they tend to produce matching measurement results.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Create one of the most famous entangled quantum states:
+          a Bell state.
+        </p>
+      
+        <p><strong>Why This Matters:</strong></p>
+      
+        <p>
+          Entanglement is one of the defining features of quantum computing
+          and enables many quantum algorithms and communication protocols.
+        </p>
+      
+        <p>
+          Unlike ordinary classical systems,
+          entangled quantum systems behave as a single combined system
+          even when consisting of multiple qubits.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Press H on Qubit 0</li>
+          <li>Press CNOT</li>
+          <li>Press Measure, then repeat 1 → 2 → 3 → 4</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+        
+        <p>
+          Measurements become either |000⟩ or |110⟩,
+          while most other basis states rarely appear.
+        </p>
+        
+        <p>
+          Qubit 0 and qubit 1 become entangled,
+          while qubit 2 remains in the |0⟩ state.
+        </p>
+        
+        <p>
+          The generated Bell state is:
+        </p>
+        
+        <p>
+          (|000⟩ + |110⟩) / √2
+        </p>
+      </div>
 
       <div class="card">
         <h2>Use Case 7 — Controlled Operations</h2>
@@ -1393,9 +1394,9 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-  The target qubit flips conditionally,
-  producing the |110⟩ state.
-</p>
+          The target qubit flips conditionally,
+          producing the |110⟩ state.
+        </p>
       </div>
       
       <div class="card">
@@ -1430,136 +1431,136 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-  Different basis states among
-  |000⟩ through |111⟩
-  gain or lose probability depending on
-  the applied quantum operations.
-</p>
+          Different basis states among
+          |000⟩ through |111⟩
+          gain or lose probability depending on
+          the applied quantum operations.
+        </p>
       </div>
 
-<div class="card">
-
-  <h2>Use Case 9 — GHZ State Creation</h2>
-
-  <p>
-    This demonstrates genuine three-qubit entanglement.
-  </p>
-
-  <p><strong>Objective:</strong></p>
-
-  <p>
-    Create a GHZ state involving all three qubits.
-  </p>
-
-  <p><strong>Why This Matters:</strong></p>
-
-  <p>
-    GHZ states are among the most important
-    multi-qubit quantum states.
-  </p>
-
-  <p>
-    They demonstrate correlations that cannot be
-    explained using classical physics.
-  </p>
-
-  <p><strong>Steps:</strong></p>
-
-  <ol>
-    <li>Press Reset</li>
-    <li>Press GHZ State</li>
-    <li>Observe the probability bars</li>
-    <li>Press Measure several times</li>
-  </ol>
-
-  <p><strong>Expected Result:</strong></p>
-
-  <p>
-    Measurements become either |000⟩ or |111⟩.
-  </p>
-
-  <p>
-    All three qubits become entangled together.
-  </p>
-
-  <p>
-    The generated state is:
-  </p>
-
-  <p>
-    (|000⟩ + |111⟩) / √2
-  </p>
-
-</div>
-
-<div class="card">
-
-  <h2>Use Case 10 — Bloch Sphere Analysis</h2>
-
-  <p>
-    This demonstrates how each individual qubit
-    can be represented by a reduced density matrix
-    and visualized on a Bloch sphere.
-  </p>
-
-  <p><strong>Steps:</strong></p>
-
-  <ol>
-    <li>Press Reset</li>
-    <li>Apply H on Qubit 0</li>
-    <li>Observe the Bloch spheres</li>
-  </ol>
-
-  <p><strong>Expected Result:</strong></p>
-
-  <p>
-    Qubit 0 moves toward the +X direction,
-    indicating a superposition state.
-  </p>
-
-  <p>
-    The other qubits remain near the north pole,
-    corresponding to |0⟩.
-  </p>
-
-</div>
-
-<div class="card">
-
-  <h2>Use Case 11 — Density Matrix Visualization</h2>
-
-  <p>
-    This demonstrates the full density matrix
-    of the 3-qubit quantum state.
-  </p>
-
-  <p><strong>Objective:</strong></p>
-
-  <p>
-    Observe how coherence and entanglement
-    appear in matrix form.
-  </p>
-
-  <p><strong>Steps:</strong></p>
-
-  <ol>
-    <li>Press Reset</li>
-    <li>Create a Bell state or GHZ state</li>
-    <li>Observe the density matrix</li>
-  </ol>
-
-  <p><strong>Expected Result:</strong></p>
-
-  <p>
-    Bright diagonal entries indicate basis-state probabilities.
-  </p>
-
-  <p>
-    Off-diagonal entries indicate quantum coherence
-    and interference effects.
-  </p>
-
-</div>
+      <div class="card">
+      
+        <h2>Use Case 9 — GHZ State Creation</h2>
+      
+        <p>
+          This demonstrates genuine three-qubit entanglement.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Create a GHZ state involving all three qubits.
+        </p>
+      
+        <p><strong>Why This Matters:</strong></p>
+      
+        <p>
+          GHZ states are among the most important
+          multi-qubit quantum states.
+        </p>
+      
+        <p>
+          They demonstrate correlations that cannot be
+          explained using classical physics.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Press GHZ State</li>
+          <li>Observe the probability bars</li>
+          <li>Press Measure several times</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          Measurements become either |000⟩ or |111⟩.
+        </p>
+      
+        <p>
+          All three qubits become entangled together.
+        </p>
+      
+        <p>
+          The generated state is:
+        </p>
+      
+        <p>
+          (|000⟩ + |111⟩) / √2
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 10 — Bloch Sphere Analysis</h2>
+      
+        <p>
+          This demonstrates how each individual qubit
+          can be represented by a reduced density matrix
+          and visualized on a Bloch sphere.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Apply H on Qubit 0</li>
+          <li>Observe the Bloch spheres</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          Qubit 0 moves toward the +X direction,
+          indicating a superposition state.
+        </p>
+      
+        <p>
+          The other qubits remain near the north pole,
+          corresponding to |0⟩.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 11 — Density Matrix Visualization</h2>
+      
+        <p>
+          This demonstrates the full density matrix
+          of the 3-qubit quantum state.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Observe how coherence and entanglement
+          appear in matrix form.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Create a Bell state or GHZ state</li>
+          <li>Observe the density matrix</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          Bright diagonal entries indicate basis-state probabilities.
+        </p>
+      
+        <p>
+          Off-diagonal entries indicate quantum coherence
+          and interference effects.
+        </p>
+      
+      </div>
 
     </div>
   `
