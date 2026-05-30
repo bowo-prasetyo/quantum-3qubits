@@ -125,7 +125,7 @@ height="520"
 <button @click="applyGate('T', 2)">T</button>
         <hr>
       
-        <button @click="applyCNOT">
+        <button @click="applyCNOT(0, 1)">
           CNOT
         </button>
       
