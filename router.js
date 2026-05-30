@@ -318,52 +318,52 @@ height="520"
     return {
       webgpuSupported: 'gpu' in navigator,
       stateRe: new Float64Array([
-  1,0,0,0,0,0,0,0
-]),
+        1, 0, 0, 0, 0, 0, 0, 0
+      ]),
 
-stateIm: new Float64Array(8),
+      stateIm: new Float64Array(8),
 
-circuit: [],
+      circuit: [],
 
-measurement: '-',
+      measurement: '-',
 
-worker: null
-    
+      worker: null
+
     };
   },
 
   computed: {
     prettyState() {
 
-  const result = [];
+      const result = [];
 
-  for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 8; i++) {
 
-    result.push({
-      basis: i.toString(2).padStart(3, '0'),
-      re: this.stateRe[i],
-      im: this.stateIm[i]
-    });
-  }
+        result.push({
+          basis: i.toString(2).padStart(3, '0'),
+          re: this.stateRe[i],
+          im: this.stateIm[i]
+        });
+      }
 
-  return JSON.stringify(result, null, 2);
-},
+      return JSON.stringify(result, null, 2);
+    },
     probabilities() {
 
-  const result = [];
+      const result = [];
 
-  for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 8; i++) {
 
-    result.push(
+        result.push(
 
-      this.stateRe[i] * this.stateRe[i] +
+          this.stateRe[i] * this.stateRe[i] +
 
-      this.stateIm[i] * this.stateIm[i]
-    );
-  }
+          this.stateIm[i] * this.stateIm[i]
+        );
+      }
 
-  return result;
-}
+      return result;
+    }
   },
 
   async mounted() {
@@ -373,31 +373,31 @@ worker: null
 
     this.worker.onmessage = async (e) => {
 
-  this.stateRe = e.data.re;
+      this.stateRe = e.data.re;
 
-  this.stateIm = e.data.im;
+      this.stateIm = e.data.im;
 
-  if (e.data.measured !== undefined) {
-  this.measurement = e.data.measured;
-}
-      
-  await window.db.saveState(
-    this.stateRe,
-    this.stateIm,
-    this.circuit
-  );
+      if (e.data.measured !== undefined) {
+        this.measurement = e.data.measured;
+      }
 
-  this.redrawAll();
-};
+      await window.db.saveState(
+        this.stateRe,
+        this.stateIm,
+        this.circuit
+      );
+
+      this.redrawAll();
+    };
 
     const saved = await window.db.loadState();
-    
+
     if (saved) {
-    
+
       this.stateRe = saved.stateRe;
-    
+
       this.stateIm = saved.stateIm;
-    
+
       this.circuit = saved.circuit;
     }
 
@@ -406,18 +406,18 @@ worker: null
 
   methods: {
     drawBlochSpheres() {
-    
+
       const canvas = this.$refs.canvas;
       const ctx = canvas.getContext('2d');
-    
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
       const W = canvas.width;
       const H = canvas.height;
-    
+
       const cx = W / 2;
       const cy = H / 2;
-    
+
       const radius = 140;
       const perspective = 0.35;
 
@@ -427,43 +427,43 @@ worker: null
           y: cy - (z + y * perspective) * radius
         };
       }
-    
+
       //
       // BACKGROUND
       //
-    
+
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, W, H);
-    
+
       //
       // SPHERE
       //
-    
+
       ctx.strokeStyle = '#666';
       ctx.lineWidth = 2;
-    
+
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.stroke();
-    
+
       //
       // EQUATOR
       //
-    
+
       ctx.beginPath();
       ctx.ellipse(cx, cy, radius, radius * 0.35, 0, 0, Math.PI * 2);
       ctx.stroke();
-    
+
       //
       // Z AXIS
       //
-    
+
       ctx.strokeStyle = '#444';
 
       {
         const p1 = project(0, 0, 1);
         const p2 = project(0, 0, -1);
-      
+
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
@@ -473,476 +473,472 @@ worker: null
       //
       // Y AXIS
       //
-      
+
       ctx.strokeStyle = '#888';
-      
+
       {
         const p1 = project(0, -1, 0);
         const p2 = project(0, 1, 0);
-      
+
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
-    
+
       //
       // X AXIS
       //
       {
         const p1 = project(-1, 0, 0);
         const p2 = project(1, 0, 0);
-      
+
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
-    
+
       //
       // LABELS
       //
-      
+
       ctx.fillStyle = 'white';
-      
+
       {
         const p0 = project(0, 0, 1);
         const p1 = project(0, 0, -1);
-      
+
         ctx.fillText('|0⟩', p0.x - 10, p0.y - 10);
         ctx.fillText('|1⟩', p1.x - 10, p1.y + 20);
       }
-      
+
       {
         const px1 = project(1, 0, 0);
         const px2 = project(-1, 0, 0);
-      
+
         ctx.fillText('X', px1.x + 10, px1.y);
         ctx.fillText('-X', px2.x - 25, px2.y);
       }
-      
+
       {
         const py1 = project(0, 1, 0);
         const py2 = project(0, -1, 0);
-      
+
         ctx.fillText('Y', py1.x + 10, py1.y);
         ctx.fillText('-Y', py2.x - 25, py2.y);
       }
-            
+
       //
       // CURRENT QUANTUM STATE
       //
-    
+
       const alpha = this.state[0];
       const beta = this.state[1];
-    
+
       //
       // BLOCH SPHERE COORDINATES
       //
-    
+
       const alphaMag =
         alpha.re * alpha.re +
         alpha.im * alpha.im;
-    
+
       const betaMag =
         beta.re * beta.re +
         beta.im * beta.im;
-    
+
       //
       // Relative phase
       //
-    
+
       const phaseAlpha =
         Math.atan2(alpha.im, alpha.re);
-    
+
       const phaseBeta =
         Math.atan2(beta.im, beta.re);
-    
+
       const phi = phaseBeta - phaseAlpha;
-    
+
       //
       // theta
       //
-    
+
       const theta =
         2 * Math.acos(Math.sqrt(alphaMag));
-    
+
       //
       // Bloch coordinates
       //
-    
+
       const x =
         Math.sin(theta) * Math.cos(phi);
-    
+
       const y =
         Math.sin(theta) * Math.sin(phi);
-    
+
       const z =
         Math.cos(theta);
-    
+
       //
       // Simple 3D projection
       //
 
       const projected = project(x, y, z);
-      
+
       const screenX = projected.x;
       const screenY = projected.y;
-      
+
       //
       // DRAW VECTOR
       //
-    
+
       ctx.strokeStyle = '#2f6fed';
       ctx.lineWidth = 4;
-    
+
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(screenX, screenY);
       ctx.stroke();
-    
+
       //
       // VECTOR TIP
       //
-    
+
       ctx.fillStyle = '#2f6fed';
-    
+
       ctx.beginPath();
       ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
       ctx.fill();
-    
+
       //
       // DEBUG INFO
       //
-    
+
       ctx.fillStyle = '#aaa';
-    
+
       ctx.fillText(
         `x=${x.toFixed(2)}`,
         10,
         20
       );
-    
+
       ctx.fillText(
         `y=${y.toFixed(2)}`,
         10,
         40
       );
-    
+
       ctx.fillText(
         `z=${z.toFixed(2)}`,
         10,
         60
       );
-    
+
     }
   },
-  
-    redrawAll() {
 
-  this.drawProbabilities();
+  redrawAll() {
 
-  this.drawDensityMatrix();
+    this.drawProbabilities();
 
-  this.drawEntanglement();
+    this.drawDensityMatrix();
 
-  this.drawBlochSpheres();
+    this.drawEntanglement();
 
-  this.renderWebGL();
-},
-    
-    async createGHZState() {
+    this.drawBlochSpheres();
 
-  await this.applyGate('H', 0);
+    this.renderWebGL();
+  },
 
-  setTimeout(async () => {
+  async createGHZState() {
 
-    await this.applyCNOT(0, 1);
+    await this.applyGate('H', 0);
 
     setTimeout(async () => {
 
-      await this.applyCNOT(1, 2);
+      await this.applyCNOT(0, 1);
+
+      setTimeout(async () => {
+
+        await this.applyCNOT(1, 2);
+
+      }, 50);
 
     }, 50);
+  },
+  initWebGL() {
 
-  }, 50);
-},
-    initWebGL() {
-  
-      const canvas = this.$refs.webglCanvas;
-  
-      this.gl = canvas.getContext('webgl');
-  
-      if (!this.gl) {
-        console.error('WebGL unsupported');
-        return;
-      }
-  
-      const gl = this.gl;
-  
-      gl.viewport(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-  
-      gl.clearColor(0, 0, 0, 1);
-    },
-  
-    renderWebGL() {
-  
-      const gl = this.gl;
-  
-      if (!gl) return;
-  
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    },
-        
-    drawDensityMatrix() {
+    const canvas = this.$refs.webglCanvas;
 
-      const canvas = this.$refs.densityCanvas;
+    this.gl = canvas.getContext('webgl');
 
-      const ctx = canvas.getContext('2d');
-    
-      const size = 8;
-      const cell = 40;
-    
-      ctx.clearRect(
-  0,
-  0,
-  canvas.width,
-  canvas.height
-);
-    
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-    
-          const value = Math.sqrt(
-            this.stateRe[i] * this.stateRe[j] +
-            this.stateIm[i] * this.stateIm[j]
-          );
-    
-          const intensity = Math.min(255, value * 255);
-    
-          ctx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
-    
-          ctx.fillRect(
-            j * cell,
-            i * cell,
-            cell,
-            cell
-          );
-        }
-      }
-    },
-        
-    async runCircuit() {
+    if (!this.gl) {
+      console.error('WebGL unsupported');
+      return;
+    }
 
-      for (const step of this.circuit) {
-    
-        this.currentAnimatingGate = step;
-    
-        if (step.gate === 'CNOT') {
-    
-          await this.applyCNOT(
-            step.control,
-            step.target
-          );
-        }
-    
-        else {
-    
-          await this.applyGate(
-            step.gate,
-            step.target
-          );
-        }
-    
-        await new Promise(r => setTimeout(r, 500));
-      }
-    
-      this.currentAnimatingGate = null;
-    },
-        
-    startDrag(gate) {
-      this.draggingGate = gate;
-    },
-    
-    dropGate() {
-    
-      if (this.draggingGate === 'CNOT') {
-    
-        this.circuit.push({
-          gate: 'CNOT',
-          control: 0,
-          target: 1
-        });
-      }
-    
-      else {
-    
-        this.circuit.push({
-          gate: this.draggingGate,
-          target: 0
-        });
-      }
-    },
-        
-    createBellState() {
-    
-      this.applyGate('H', 0);
-    
-      setTimeout(() => {
-        this.applyCNOT(0, 1);
-      }, 50);
-    },
+    const gl = this.gl;
 
-    applyCNOT(control = 0, target = 1) {
+    gl.viewport(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
-  this.worker.postMessage({
+    gl.clearColor(0, 0, 0, 1);
+  },
 
-    type: 'cnot',
+  renderWebGL() {
 
-    control,
+    const gl = this.gl;
 
-    target,
+    if (!gl) return;
 
-    qubitCount: 3,
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  },
 
-    re: this.stateRe,
+  drawDensityMatrix() {
 
-    im: this.stateIm
+    const canvas = this.$refs.densityCanvas;
 
-  }, [
-    this.stateRe.buffer,
-    this.stateIm.buffer
-  ]);
-},
+    const ctx = canvas.getContext('2d');
 
-    applyGate(gate, targetQubit) {
+    const size = 8;
+    const cell = 40;
 
-  this.worker.postMessage({
+    ctx.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
-    type: 'gate',
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
 
-    gate,
-
-    targetQubit,
-
-    qubitCount: 3,
-
-    re: this.stateRe,
-
-    im: this.stateIm
-
-  }, [
-    this.stateRe.buffer,
-    this.stateIm.buffer
-  ]);
-},
-    
-    measure() {
-
-  this.worker.postMessage({
-
-    type: 'measure',
-
-    qubitCount: 3,
-
-    re: this.stateRe,
-
-    im: this.stateIm
-
-  }, [
-    this.stateRe.buffer,
-    this.stateIm.buffer
-  ]);
-},
-        
-    async reset() {
-      this.stateRe = new Float64Array([
-  1,0,0,0,0,0,0,0
-]);
-
-this.stateIm = new Float64Array(8);
-      
-        this.measurement = '-';
-      
-        await window.db.saveState(
-          this.stateRe,
-          this.stateIm,
-          this.circuit
+        const value = Math.sqrt(
+          this.stateRe[i] * this.stateRe[j] +
+          this.stateIm[i] * this.stateIm[j]
         );
-      
-        this.redrawAll();
 
-    },
+        const intensity = Math.min(255, value * 255);
 
-    drawProbabilities() {
-    
-      const canvas = this.$refs.probabilityCanvas;
-    
-      const ctx = canvas.getContext('2d');
-    
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-    
-      const labels = [
-        '|000⟩',
-        '|001⟩',
-        '|010⟩',
-        '|011⟩',
-        '|100⟩',
-        '|101⟩',
-        '|110⟩',
-        '|111⟩'
-      ];
-    
-      const probs = this.probabilities;
-    
-    
-      const barWidth = 60;
-    
-      const spacing = 15;
-    
-      for (let i = 0; i < 8; i++) {
-    
-        const x =
-          20 + i * (barWidth + spacing);
-    
-        const height =
-          probs[i] * 200;
-    
-        ctx.fillStyle = '#4caf50';
-    
+        ctx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
+
         ctx.fillRect(
-          x,
-          250 - height,
-          barWidth,
-          height
-        );
-    
-        ctx.fillStyle = '#ffffff';
-    
-        ctx.fillText(
-          labels[i],
-          x,
-          270
-        );
-    
-        ctx.fillText(
-          (probs[i] * 100).toFixed(1) + '%',
-          x,
-          240 - height
+          j * cell,
+          i * cell,
+          cell,
+          cell
         );
       }
     }
+  },
+
+  async runCircuit() {
+
+    for (const step of this.circuit) {
+
+      this.currentAnimatingGate = step;
+
+      if (step.gate === 'CNOT') {
+
+        await this.applyCNOT(
+          step.control,
+          step.target
+        );
+      } else {
+
+        await this.applyGate(
+          step.gate,
+          step.target
+        );
+      }
+
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    this.currentAnimatingGate = null;
+  },
+
+  startDrag(gate) {
+    this.draggingGate = gate;
+  },
+
+  dropGate() {
+
+    if (this.draggingGate === 'CNOT') {
+
+      this.circuit.push({
+        gate: 'CNOT',
+        control: 0,
+        target: 1
+      });
+    } else {
+
+      this.circuit.push({
+        gate: this.draggingGate,
+        target: 0
+      });
+    }
+  },
+
+  createBellState() {
+
+    this.applyGate('H', 0);
+
+    setTimeout(() => {
+      this.applyCNOT(0, 1);
+    }, 50);
+  },
+
+  applyCNOT(control = 0, target = 1) {
+
+    this.worker.postMessage({
+
+      type: 'cnot',
+
+      control,
+
+      target,
+
+      qubitCount: 3,
+
+      re: this.stateRe,
+
+      im: this.stateIm
+
+    }, [
+      this.stateRe.buffer,
+      this.stateIm.buffer
+    ]);
+  },
+
+  applyGate(gate, targetQubit) {
+
+    this.worker.postMessage({
+
+      type: 'gate',
+
+      gate,
+
+      targetQubit,
+
+      qubitCount: 3,
+
+      re: this.stateRe,
+
+      im: this.stateIm
+
+    }, [
+      this.stateRe.buffer,
+      this.stateIm.buffer
+    ]);
+  },
+
+  measure() {
+
+    this.worker.postMessage({
+
+      type: 'measure',
+
+      qubitCount: 3,
+
+      re: this.stateRe,
+
+      im: this.stateIm
+
+    }, [
+      this.stateRe.buffer,
+      this.stateIm.buffer
+    ]);
+  },
+
+  async reset() {
+    this.stateRe = new Float64Array([
+      1, 0, 0, 0, 0, 0, 0, 0
+    ]);
+
+    this.stateIm = new Float64Array(8);
+
+    this.measurement = '-';
+
+    await window.db.saveState(
+      this.stateRe,
+      this.stateIm,
+      this.circuit
+    );
+
+    this.redrawAll();
+
+  },
+
+  drawProbabilities() {
+
+    const canvas = this.$refs.probabilityCanvas;
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const labels = [
+      '|000⟩',
+      '|001⟩',
+      '|010⟩',
+      '|011⟩',
+      '|100⟩',
+      '|101⟩',
+      '|110⟩',
+      '|111⟩'
+    ];
+
+    const probs = this.probabilities;
+
+
+    const barWidth = 60;
+
+    const spacing = 15;
+
+    for (let i = 0; i < 8; i++) {
+
+      const x =
+        20 + i * (barWidth + spacing);
+
+      const height =
+        probs[i] * 200;
+
+      ctx.fillStyle = '#4caf50';
+
+      ctx.fillRect(
+        x,
+        250 - height,
+        barWidth,
+        height
+      );
+
+      ctx.fillStyle = '#ffffff';
+
+      ctx.fillText(
+        labels[i],
+        x,
+        270
+      );
+
+      ctx.fillText(
+        (probs[i] * 100).toFixed(1) + '%',
+        x,
+        240 - height
+      );
+    }
   }
+}
 };
 
 const Manual = {
@@ -1314,8 +1310,7 @@ const Manual = {
 
 export const router = VueRouter.createRouter({
   history: VueRouter.createWebHashHistory(),
-  routes: [
-    {
+  routes: [{
       path: '/',
       component: Home
     },
