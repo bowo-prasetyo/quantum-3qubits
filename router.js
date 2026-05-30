@@ -643,7 +643,7 @@ height="520"
 
       this.drawDensityMatrix();
 
-      this.drawEntanglement();
+      //this.drawEntanglement();
 
       this.drawBlochSpheres();
 
