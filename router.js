@@ -454,102 +454,27 @@ height="520"
 
   methods: {
     computeBlochVectors() {
-    
-      const vectors = [];
-    
-      //
-      // complex amplitudes
-      //
-    
-      const psi = [];
-    
-      for (let i = 0; i < 8; i++) {
-    
-        psi.push({
-          re: this.stateRe[i],
-          im: this.stateIm[i]
-        });
-      }
-    
-      //
-      // one reduced density matrix per qubit
-      //
-    
-      for (let targetQubit = 0;
-           targetQubit < 3;
-           targetQubit++) {
-    
-        let rho00re = 0;
-        let rho11re = 0;
-    
-        let rho01re = 0;
-        let rho01im = 0;
-    
-        //
-        // trace out other qubits
-        //
-    
-        for (let basis = 0;
-             basis < 8;
-             basis++) {
-    
-          const bit =
-            (basis >> targetQubit) & 1;
-    
-          if (bit === 0) {
-    
-            rho00re +=
-              psi[basis].re * psi[basis].re +
-              psi[basis].im * psi[basis].im;
-    
-            //
-            // matching basis state
-            // with target qubit flipped
-            //
-    
-            const partner =
-              basis | (1 << targetQubit);
-    
-            const a = psi[basis];
-            const b = psi[partner];
-    
-            //
-            // a * conj(b)
-            //
-    
-            rho01re +=
-              a.re * b.re +
-              a.im * b.im;
-    
-            rho01im +=
-              a.im * b.re -
-              a.re * b.im;
-    
-          } else {
-    
-            rho11re +=
-              psi[basis].re * psi[basis].re +
-              psi[basis].im * psi[basis].im;
-          }
-        }
-    
-        //
-        // Bloch coordinates
-        //
-    
-        const x = 2 * rho01re;
-        const y = 2 * rho01im;
-        const z = rho00re - rho11re;
-    
-        vectors.push({
-          x,
-          y,
-          z
-        });
-      }
-    
-      return vectors;
-    },
+
+  const vectors = [];
+
+  for (let q = 0; q < 3; q++) {
+
+    const rho =
+      this.getReducedDensityMatrix(q);
+
+    vectors.push({
+
+      x: 2 * rho.rho01Re,
+
+      y: -2 * rho.rho01Im,
+
+      z: rho.rho00 - rho.rho11
+
+    });
+  }
+
+  return vectors;
+},
         
     drawSingleBlochSphere(canvas, x, y, z) {
     
