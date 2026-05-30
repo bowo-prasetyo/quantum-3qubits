@@ -956,246 +956,125 @@ const Home = {
     },
     
     renderWebGL() {
-    
+
       const gl = this.gl;
-    
       if (!gl) return;
     
-      gl.viewport(
-        0,
-        0,
-        gl.canvas.width,
-        gl.canvas.height
-      );
-    
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       gl.clearColor(0, 0, 0, 1);
-    
       gl.clear(gl.COLOR_BUFFER_BIT);
     
-      //
-      // build constellation points
-      //
-    
       const vertices = [];
-    
       const sizes = [];
+      const colors = [];
     
       for (let i = 0; i < 8; i++) {
     
         const re = this.stateRe[i];
-    
         const im = this.stateIm[i];
     
-        const prob =
-          re * re +
-          im * im;
+        const prob = re * re + im * im;
     
-        //
-        // map complex plane to WebGL space
-        //
-        // (-1..1)
-        //
+        // phase → color encoding
+        const phase = Math.atan2(im, re);
     
-        vertices.push(
-          re,
-          im
-        );
+        const r = 0.5 + 0.5 * Math.cos(phase);
+        const g = 0.5 + 0.5 * Math.cos(phase + 2.0);
+        const b = 0.5 + 0.5 * Math.cos(phase + 4.0);
     
-        //
-        // visible point size
-        //
+        // basis index → cube position
+        const bit0 = (i >> 2) & 1;
+        const bit1 = (i >> 1) & 1;
+        const bit2 = i & 1;
     
-        sizes.push(
-          6 + prob * 40
-        );
+        const x = bit0 ? 1 : -1;
+        const y = bit1 ? 1 : -1;
+        const z = bit2 ? 1 : -1;
+    
+        vertices.push(x, y, z);
+    
+        sizes.push(5 + prob * 60);
+    
+        colors.push(r, g, b);
       }
     
-      //
-      // vertex shader
-      //
-    
       const vs = `
-        attribute vec2 pos;
+        attribute vec3 pos;
         attribute float pointSize;
+        attribute vec3 color;
+    
+        varying vec3 vColor;
     
         void main() {
     
-          gl_Position =
-            vec4(
-              pos.x,
-              pos.y,
-              0.0,
-              1.0
-            );
+          vColor = color;
     
-          gl_PointSize =
-            pointSize;
+          gl_Position =
+            vec4(pos * 0.6, 1.0);
+    
+          gl_PointSize = pointSize;
         }
       `;
-    
-      //
-      // fragment shader
-      //
     
       const fs = `
         precision mediump float;
     
+        varying vec3 vColor;
+    
         void main() {
     
-          float dx =
-            gl_PointCoord.x - 0.5;
+          float dx = gl_PointCoord.x - 0.5;
+          float dy = gl_PointCoord.y - 0.5;
     
-          float dy =
-            gl_PointCoord.y - 0.5;
+          if (dx*dx + dy*dy > 0.25) discard;
     
-          if (
-            dx*dx + dy*dy > 0.25
-          ) {
-            discard;
-          }
-    
-          gl_FragColor =
-            vec4(
-              0.2,
-              0.8,
-              1.0,
-              1.0
-            );
+          gl_FragColor = vec4(vColor, 1.0);
         }
       `;
     
-      const vert =
-        gl.createShader(
-          gl.VERTEX_SHADER
-        );
+      const program = gl.createProgram();
     
-      gl.shaderSource(
-        vert,
-        vs
-      );
+      const vert = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vert, vs);
+      gl.compileShader(vert);
     
-      gl.compileShader(
-        vert
-      );
+      const frag = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(frag, fs);
+      gl.compileShader(frag);
     
-      const frag =
-        gl.createShader(
-          gl.FRAGMENT_SHADER
-        );
+      gl.attachShader(program, vert);
+      gl.attachShader(program, frag);
+      gl.linkProgram(program);
+      gl.useProgram(program);
     
-      gl.shaderSource(
-        frag,
-        fs
-      );
+      // POSITION
+      const posBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     
-      gl.compileShader(
-        frag
-      );
+      const posLoc = gl.getAttribLocation(program, "pos");
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
     
-      const program =
-        gl.createProgram();
+      // SIZE
+      const sizeBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
     
-      gl.attachShader(
-        program,
-        vert
-      );
+      const sizeLoc = gl.getAttribLocation(program, "pointSize");
+      gl.enableVertexAttribArray(sizeLoc);
+      gl.vertexAttribPointer(sizeLoc, 1, gl.FLOAT, false, 0, 0);
     
-      gl.attachShader(
-        program,
-        frag
-      );
+      // COLOR
+      const colorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     
-      gl.linkProgram(
-        program
-      );
+      const colorLoc = gl.getAttribLocation(program, "color");
+      gl.enableVertexAttribArray(colorLoc);
+      gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
     
-      gl.useProgram(
-        program
-      );
-    
-      //
-      // positions
-      //
-    
-      const posBuffer =
-        gl.createBuffer();
-    
-      gl.bindBuffer(
-        gl.ARRAY_BUFFER,
-        posBuffer
-      );
-    
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(vertices),
-        gl.STATIC_DRAW
-      );
-    
-      const posLoc =
-        gl.getAttribLocation(
-          program,
-          'pos'
-        );
-    
-      gl.enableVertexAttribArray(
-        posLoc
-      );
-    
-      gl.vertexAttribPointer(
-        posLoc,
-        2,
-        gl.FLOAT,
-        false,
-        0,
-        0
-      );
-    
-      //
-      // point sizes
-      //
-    
-      const sizeBuffer =
-        gl.createBuffer();
-    
-      gl.bindBuffer(
-        gl.ARRAY_BUFFER,
-        sizeBuffer
-      );
-    
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(sizes),
-        gl.STATIC_DRAW
-      );
-    
-      const sizeLoc =
-        gl.getAttribLocation(
-          program,
-          'pointSize'
-        );
-    
-      gl.enableVertexAttribArray(
-        sizeLoc
-      );
-    
-      gl.vertexAttribPointer(
-        sizeLoc,
-        1,
-        gl.FLOAT,
-        false,
-        0,
-        0
-      );
-    
-      //
-      // draw points
-      //
-    
-      gl.drawArrays(
-        gl.POINTS,
-        0,
-        8
-      );
+      gl.drawArrays(gl.POINTS, 0, 8);
     },
     
     drawDensityMatrix() {
