@@ -999,29 +999,246 @@ const Home = {
     },
     
     renderWebGL() {
-
+    
       const gl = this.gl;
     
       if (!gl) return;
     
+      gl.viewport(
+        0,
+        0,
+        gl.canvas.width,
+        gl.canvas.height
+      );
+    
+      gl.clearColor(0, 0, 0, 1);
+    
       gl.clear(gl.COLOR_BUFFER_BIT);
     
-      const points = [];
+      //
+      // build constellation points
+      //
+    
+      const vertices = [];
+    
+      const sizes = [];
     
       for (let i = 0; i < 8; i++) {
     
-        points.push({
+        const re = this.stateRe[i];
     
-          x: this.stateRe[i],
+        const im = this.stateIm[i];
     
-          y: this.stateIm[i],
+        const prob =
+          re * re +
+          im * im;
     
-          z: i
+        //
+        // map complex plane to WebGL space
+        //
+        // (-1..1)
+        //
     
-        });
+        vertices.push(
+          re,
+          im
+        );
+    
+        //
+        // visible point size
+        //
+    
+        sizes.push(
+          6 + prob * 40
+        );
       }
     
-      this.renderConstellation(points);
+      //
+      // vertex shader
+      //
+    
+      const vs = `
+        attribute vec2 pos;
+        attribute float pointSize;
+    
+        void main() {
+    
+          gl_Position =
+            vec4(
+              pos.x,
+              pos.y,
+              0.0,
+              1.0
+            );
+    
+          gl_PointSize =
+            pointSize;
+        }
+      `;
+    
+      //
+      // fragment shader
+      //
+    
+      const fs = `
+        precision mediump float;
+    
+        void main() {
+    
+          float dx =
+            gl_PointCoord.x - 0.5;
+    
+          float dy =
+            gl_PointCoord.y - 0.5;
+    
+          if (
+            dx*dx + dy*dy > 0.25
+          ) {
+            discard;
+          }
+    
+          gl_FragColor =
+            vec4(
+              0.2,
+              0.8,
+              1.0,
+              1.0
+            );
+        }
+      `;
+    
+      const vert =
+        gl.createShader(
+          gl.VERTEX_SHADER
+        );
+    
+      gl.shaderSource(
+        vert,
+        vs
+      );
+    
+      gl.compileShader(
+        vert
+      );
+    
+      const frag =
+        gl.createShader(
+          gl.FRAGMENT_SHADER
+        );
+    
+      gl.shaderSource(
+        frag,
+        fs
+      );
+    
+      gl.compileShader(
+        frag
+      );
+    
+      const program =
+        gl.createProgram();
+    
+      gl.attachShader(
+        program,
+        vert
+      );
+    
+      gl.attachShader(
+        program,
+        frag
+      );
+    
+      gl.linkProgram(
+        program
+      );
+    
+      gl.useProgram(
+        program
+      );
+    
+      //
+      // positions
+      //
+    
+      const posBuffer =
+        gl.createBuffer();
+    
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        posBuffer
+      );
+    
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(vertices),
+        gl.STATIC_DRAW
+      );
+    
+      const posLoc =
+        gl.getAttribLocation(
+          program,
+          'pos'
+        );
+    
+      gl.enableVertexAttribArray(
+        posLoc
+      );
+    
+      gl.vertexAttribPointer(
+        posLoc,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0
+      );
+    
+      //
+      // point sizes
+      //
+    
+      const sizeBuffer =
+        gl.createBuffer();
+    
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        sizeBuffer
+      );
+    
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(sizes),
+        gl.STATIC_DRAW
+      );
+    
+      const sizeLoc =
+        gl.getAttribLocation(
+          program,
+          'pointSize'
+        );
+    
+      gl.enableVertexAttribArray(
+        sizeLoc
+      );
+    
+      gl.vertexAttribPointer(
+        sizeLoc,
+        1,
+        gl.FLOAT,
+        false,
+        0,
+        0
+      );
+    
+      //
+      // draw points
+      //
+    
+      gl.drawArrays(
+        gl.POINTS,
+        0,
+        8
+      );
     },
     
     drawDensityMatrix() {
