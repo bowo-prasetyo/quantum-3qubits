@@ -203,110 +203,160 @@ height="520"
       </div>
       
       <div class="card">
-        <h2>Quantum Concepts</h2>
-      
-        <p>
-          <strong>Quantum State</strong><br>
-          The current mathematical state of the quantum system.
-          In a 3-qubit system, the state may contain combinations of:
-          |000⟩, |001⟩ through |111⟩ simultaneously.
-        </p>
-      
-        <p>
-          <strong>Superposition</strong><br>
-          A quantum system can exist in multiple basis states at the same time.
-          Measuring the system collapses it into one classical result.
-        </p>
-      
-        <p>
-          <strong>Entanglement</strong><br>
-          Two qubits can become correlated in a way that classical systems cannot reproduce.
-          Measuring one qubit can instantly determine the other.
-        </p>
-      
-        <p>
-          <strong>Bell State</strong><br>
-          A famous entangled quantum state.
-          The simulator can generate:
-          (|00⟩ + |11⟩) / √2
-          using a Hadamard gate followed by a CNOT gate.
-        </p>
-      
-        <p>
-          <strong>Identity Gate (I)</strong><br>
-          Does nothing to the selected qubit.
-          The quantum state remains unchanged.
-        </p>
-      
-        <p>
-          <strong>Hadamard Gate (H)</strong><br>
-          Creates superposition.
-          It transforms a definite classical state into a quantum mixture.
-        </p>
-      
-        <p>
-          <strong>Pauli-X Gate (X)</strong><br>
-          Similar to a classical NOT gate.
-          It flips |0⟩ into |1⟩ and vice versa.
-        </p>
-      
-        <p>
-          <strong>Pauli-Y Gate (Y)</strong><br>
-          Rotates the qubit using complex quantum phase.
-          It flips the state while introducing imaginary-number amplitudes.
-        </p>
-      
-        <p>
-          <strong>Pauli-Z Gate (Z)</strong><br>
-          Changes the quantum phase without directly flipping probabilities.
-          This affects interference behavior in later operations.
-        </p>
-      
-        <p>
-          <strong>Phase Gate (S)</strong><br>
-          Applies a 90-degree quantum phase rotation.
-          It is commonly used in interference and phase-control operations.
-        </p>
-      
-        <p>
-          <strong>π/8 Gate (T)</strong><br>
-          Applies a smaller 45-degree phase rotation.
-          This gate is important in universal and fault-tolerant quantum computing.
-        </p>
-      
-        <p>
-          <strong>CNOT Gate</strong><br>
-          A two-qubit gate that conditionally flips the target qubit.
-          It is one of the most important gates for creating entanglement.
-        </p>
+  <h2>Quantum Concepts</h2>
 
-        <p>
-  <strong>GHZ State</strong><br>
-  A 3-qubit entangled state where all qubits become correlated together.
-  The simulator can generate:
-  (|000⟩ + |111⟩) / √2
-  using one Hadamard gate and two CNOT gates.
-</p>
-      
-        <p>
-          <strong>Probability Bars</strong><br>
-          The visualization shows probabilities for:
-          |000⟩, |001⟩ through |111⟩.
-          Taller bars indicate higher measurement probability.
-        </p>
-      
-        <p>
-          <strong>Measure</strong><br>
-          Observes the quantum system.
-          Superposition collapses into one classical basis state.
-        </p>
-      
-        <p>
-          <strong>Measurement</strong><br>
-          Shows the latest observed classical result such as:
-          |000⟩, |001⟩ through |111⟩.
-        </p>
-      </div>
+  <p>
+    <strong>Quantum State</strong><br>
+    The current mathematical state of the 3-qubit quantum system.
+    Unlike a classical system that stores only one value,
+    a quantum state can contain all eight basis states simultaneously:
+    |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ and |111⟩.
+  </p>
+
+  <p>
+    <strong>Qubits</strong><br>
+    A qubit is the quantum equivalent of a classical bit.
+    While a classical bit can only be 0 or 1,
+    a qubit may exist in a combination of both states until measured.
+  </p>
+
+  <p>
+    <strong>Superposition</strong><br>
+    A quantum system can occupy multiple basis states simultaneously.
+    The amplitudes determine the probability of observing each state.
+    Measurement collapses the superposition into one classical result.
+  </p>
+
+  <p>
+    <strong>Quantum Amplitudes</strong><br>
+    Each basis state has a complex-valued amplitude.
+    Probabilities are calculated from the squared magnitude of these amplitudes.
+    The total probability across all basis states always equals 100%.
+  </p>
+
+  <p>
+    <strong>Entanglement</strong><br>
+    Multiple qubits can become correlated in ways that classical systems cannot reproduce.
+    Entangled qubits must be described as one combined quantum system rather than independent particles.
+  </p>
+
+  <p>
+    <strong>Bell State</strong><br>
+    A Bell state is a two-qubit entangled state.
+    The simulator can generate:
+    (|00⟩ + |11⟩) / √2
+    using a Hadamard gate followed by a CNOT gate.
+  </p>
+
+  <p>
+    <strong>GHZ State</strong><br>
+    A Greenberger–Horne–Zeilinger (GHZ) state is a three-qubit entangled state.
+    The simulator can generate:
+    (|000⟩ + |111⟩) / √2
+    using one Hadamard gate and two CNOT gates.
+    In a GHZ state, all three qubits become strongly correlated.
+  </p>
+
+  <p>
+    <strong>Identity Gate (I)</strong><br>
+    Leaves the selected qubit unchanged.
+    The quantum state remains exactly the same.
+  </p>
+
+  <p>
+    <strong>Hadamard Gate (H)</strong><br>
+    Creates superposition.
+    It transforms a definite classical state into a quantum mixture of possibilities.
+  </p>
+
+  <p>
+    <strong>Pauli-X Gate (X)</strong><br>
+    Similar to a classical NOT gate.
+    It flips |0⟩ into |1⟩ and |1⟩ into |0⟩.
+  </p>
+
+  <p>
+    <strong>Pauli-Y Gate (Y)</strong><br>
+    Flips the qubit while introducing a complex phase.
+    It combines bit-flip and phase effects.
+  </p>
+
+  <p>
+    <strong>Pauli-Z Gate (Z)</strong><br>
+    Changes the quantum phase without directly changing measurement probabilities.
+    This phase can affect future interference patterns.
+  </p>
+
+  <p>
+    <strong>Phase Gate (S)</strong><br>
+    Applies a 90-degree phase rotation.
+    It is commonly used for phase manipulation and interference effects.
+  </p>
+
+  <p>
+    <strong>π/8 Gate (T)</strong><br>
+    Applies a 45-degree phase rotation.
+    The T gate is an important component of universal quantum computation.
+  </p>
+
+  <p>
+    <strong>CNOT Gate</strong><br>
+    A controlled-NOT operation involving two qubits.
+    The target qubit flips only when the control qubit is in state |1⟩.
+    CNOT is one of the primary tools for creating entanglement.
+  </p>
+
+  <p>
+    <strong>Density Matrix</strong><br>
+    The density matrix provides a complete description of the quantum system.
+    It contains both probability information and phase relationships between basis states.
+    Pure states and mixed states can both be represented using density matrices.
+  </p>
+
+  <p>
+    <strong>Reduced Density Matrix</strong><br>
+    Each Bloch sphere is computed from a reduced density matrix obtained by tracing out the other qubits.
+    This shows the local state of an individual qubit even when it is entangled with the rest of the system.
+  </p>
+
+  <p>
+    <strong>Bloch Sphere</strong><br>
+    The Bloch sphere is a geometric representation of a single qubit.
+    The vector inside the sphere indicates the qubit's quantum state.
+    Pure states lie on the surface, while entangled or mixed states move toward the center.
+  </p>
+
+  <p>
+    <strong>Probability Visualization</strong><br>
+    The probability chart displays the measurement probability of all eight basis states.
+    Taller bars indicate a higher chance of observing that state during measurement.
+  </p>
+
+  <p>
+    <strong>Entanglement Graph</strong><br>
+    The entanglement graph visualizes correlations between qubits.
+    Stronger connections indicate greater quantum correlation between pairs of qubits.
+  </p>
+
+  <p>
+    <strong>WebGL Visualization</strong><br>
+    The WebGL view uses GPU acceleration to render quantum-state visualizations more efficiently.
+    This enables smoother animation and larger future simulations.
+  </p>
+
+  <p>
+    <strong>Measurement</strong><br>
+    Measuring the quantum system collapses the superposition into one of the eight basis states.
+    The outcome appears according to the probability distribution of the current quantum state.
+  </p>
+
+  <p>
+    <strong>Measurement Result</strong><br>
+    The latest observed classical state is displayed here, such as:
+    |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ or |111⟩.
+  </p>
+
+</div>
     </div>
   `,
 
