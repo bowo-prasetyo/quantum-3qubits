@@ -1104,9 +1104,9 @@ const Home = {
       gl.shaderSource(frag, this.fs);
       gl.compileShader(frag);
     
-      gl.attachShader(program, vert);
-      gl.attachShader(program, frag);
-      gl.linkProgram(program);
+      gl.attachShader(this.program, vert);
+      gl.attachShader(this.program, frag);
+      gl.linkProgram(this.program);
 
       this.posBuffer = gl.createBuffer();
       this.sizeBuffer = gl.createBuffer();
