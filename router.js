@@ -461,6 +461,12 @@ height="520"
     const rho =
       this.getReducedDensityMatrix(q);
 
+    console.log(
+    'qubit',
+    q,
+    JSON.stringify(rho)
+  );
+    
     vectors.push({
 
       x: 2 * rho.rho01Re,
