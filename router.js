@@ -1046,6 +1046,23 @@ const Home = {
       gl.attachShader(program, frag);
       gl.linkProgram(program);
       gl.useProgram(program);
+
+      const axisVS = `
+        attribute vec3 pos;
+      
+        void main() {
+          gl_Position = vec4(pos * 0.6, 1.0);
+        }
+      `;
+      
+      const axisFS = `
+        precision mediump float;
+        uniform vec3 color;
+      
+        void main() {
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
     
       // POSITION
       const posBuffer = gl.createBuffer();
@@ -1073,7 +1090,59 @@ const Home = {
       const colorLoc = gl.getAttribLocation(program, "color");
       gl.enableVertexAttribArray(colorLoc);
       gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
-    
+
+      const axisVertices = [
+        // X axis (red conceptually)
+        -1, 0, 0,
+         1, 0, 0,
+      
+        // Y axis (green)
+        0, -1, 0,
+        0,  1, 0,
+      
+        // Z axis (blue)
+        0, 0, -1,
+        0, 0,  1
+      ];
+
+      const axisProgram = gl.createProgram();
+
+      const axisVert = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(axisVert, axisVS);
+      gl.compileShader(axisVert);
+      
+      const axisFrag = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(axisFrag, axisFS);
+      gl.compileShader(axisFrag);
+      
+      gl.attachShader(axisProgram, axisVert);
+      gl.attachShader(axisProgram, axisFrag);
+      gl.linkProgram(axisProgram);
+
+      const axisBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
+
+      gl.useProgram(axisProgram);
+
+      const axisPosLoc = gl.getAttribLocation(axisProgram, "pos");
+      gl.enableVertexAttribArray(axisPosLoc);
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
+      gl.vertexAttribPointer(axisPosLoc, 3, gl.FLOAT, false, 0, 0);
+      
+      // X axis (red)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 1.0, 0.2, 0.2);
+      gl.drawArrays(gl.LINES, 0, 2);
+      
+      // Y axis (green)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 1.0, 0.2);
+      gl.drawArrays(gl.LINES, 2, 2);
+      
+      // Z axis (blue)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 0.4, 1.0);
+      gl.drawArrays(gl.LINES, 4, 2);
+            
       gl.drawArrays(gl.POINTS, 0, 8);
     },
     
