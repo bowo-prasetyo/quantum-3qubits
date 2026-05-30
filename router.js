@@ -405,21 +405,283 @@ height="520"
   },
 
   methods: {
+    computeBlochVectors() {
+    
+      const vectors = [];
+    
+      //
+      // complex amplitudes
+      //
+    
+      const psi = [];
+    
+      for (let i = 0; i < 8; i++) {
+    
+        psi.push({
+          re: this.stateRe[i],
+          im: this.stateIm[i]
+        });
+      }
+    
+      //
+      // one reduced density matrix per qubit
+      //
+    
+      for (let targetQubit = 0;
+           targetQubit < 3;
+           targetQubit++) {
+    
+        let rho00re = 0;
+        let rho11re = 0;
+    
+        let rho01re = 0;
+        let rho01im = 0;
+    
+        //
+        // trace out other qubits
+        //
+    
+        for (let basis = 0;
+             basis < 8;
+             basis++) {
+    
+          const bit =
+            (basis >> targetQubit) & 1;
+    
+          if (bit === 0) {
+    
+            rho00re +=
+              psi[basis].re * psi[basis].re +
+              psi[basis].im * psi[basis].im;
+    
+            //
+            // matching basis state
+            // with target qubit flipped
+            //
+    
+            const partner =
+              basis | (1 << targetQubit);
+    
+            const a = psi[basis];
+            const b = psi[partner];
+    
+            //
+            // a * conj(b)
+            //
+    
+            rho01re +=
+              a.re * b.re +
+              a.im * b.im;
+    
+            rho01im +=
+              a.im * b.re -
+              a.re * b.im;
+    
+          } else {
+    
+            rho11re +=
+              psi[basis].re * psi[basis].re +
+              psi[basis].im * psi[basis].im;
+          }
+        }
+    
+        //
+        // Bloch coordinates
+        //
+    
+        const x = 2 * rho01re;
+        const y = 2 * rho01im;
+        const z = rho00re - rho11re;
+    
+        vectors.push({
+          x,
+          y,
+          z
+        });
+      }
+    
+      return vectors;
+    },
+        
+    drawSingleBlochSphere(canvas, x, y, z) {
+    
+      const ctx = canvas.getContext('2d');
+    
+      const W = canvas.width;
+      const H = canvas.height;
+    
+      ctx.clearRect(0, 0, W, H);
+    
+      const cx = W / 2;
+      const cy = H / 2;
+    
+      const radius = Math.min(W, H) * 0.35;
+    
+      const perspective = 0.35;
+    
+      function project(px, py, pz) {
+        return {
+          x: cx + (px + py * perspective) * radius,
+          y: cy - (pz + py * perspective) * radius
+        };
+      }
+    
+      //
+      // background
+      //
+    
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+    
+      //
+      // sphere outline
+      //
+    
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 2;
+    
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    
+      //
+      // equator
+      //
+    
+      ctx.beginPath();
+      ctx.ellipse(
+        cx,
+        cy,
+        radius,
+        radius * 0.35,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.stroke();
+    
+      //
+      // axes
+      //
+    
+      ctx.strokeStyle = '#555';
+    
+      {
+        const p1 = project(-1,0,0);
+        const p2 = project( 1,0,0);
+    
+        ctx.beginPath();
+        ctx.moveTo(p1.x,p1.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.stroke();
+      }
+    
+      {
+        const p1 = project(0,-1,0);
+        const p2 = project(0, 1,0);
+    
+        ctx.beginPath();
+        ctx.moveTo(p1.x,p1.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.stroke();
+      }
+    
+      {
+        const p1 = project(0,0,-1);
+        const p2 = project(0,0, 1);
+    
+        ctx.beginPath();
+        ctx.moveTo(p1.x,p1.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.stroke();
+      }
+    
+      //
+      // labels
+      //
+    
+      ctx.fillStyle = 'white';
+    
+      const north = project(0,0,1);
+      const south = project(0,0,-1);
+    
+      ctx.fillText('|0⟩', north.x - 10, north.y - 10);
+      ctx.fillText('|1⟩', south.x - 10, south.y + 20);
+    
+      //
+      // bloch vector
+      //
+    
+      const tip = project(x, y, z);
+    
+      ctx.strokeStyle = '#2f6fed';
+      ctx.lineWidth = 4;
+    
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(tip.x, tip.y);
+      ctx.stroke();
+    
+      ctx.fillStyle = '#2f6fed';
+    
+      ctx.beginPath();
+      ctx.arc(
+        tip.x,
+        tip.y,
+        6,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    
+      //
+      // coordinates
+      //
+    
+      ctx.fillStyle = '#aaa';
+    
+      ctx.fillText(
+        `x=${x.toFixed(2)}`,
+        10,
+        15
+      );
+    
+      ctx.fillText(
+        `y=${y.toFixed(2)}`,
+        10,
+        30
+      );
+    
+      ctx.fillText(
+        `z=${z.toFixed(2)}`,
+        10,
+        45
+      );
+    },
+        
     drawBlochSpheres() {
+
+      const vectors = this.computeBlochVectors();
     
-      this.drawBlochSphere(
+      this.drawSingleBlochSphere(
         this.$refs.bloch0,
-        0
+        vectors[0].x,
+        vectors[0].y,
+        vectors[0].z
       );
     
-      this.drawBlochSphere(
+      this.drawSingleBlochSphere(
         this.$refs.bloch1,
-        1
+        vectors[1].x,
+        vectors[1].y,
+        vectors[1].z
       );
     
-      this.drawBlochSphere(
+      this.drawSingleBlochSphere(
         this.$refs.bloch2,
-        2
+        vectors[2].x,
+        vectors[2].y,
+        vectors[2].z
       );
     },
         
