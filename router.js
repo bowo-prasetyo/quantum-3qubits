@@ -453,6 +453,150 @@ const Home = {
   },
 
   methods: {
+    drawEntanglement() {
+    
+      const canvas =
+        this.$refs.entanglementCanvas;
+    
+      if (!canvas) return;
+    
+      const ctx =
+        canvas.getContext('2d');
+    
+      const W = canvas.width;
+      const H = canvas.height;
+    
+      ctx.clearRect(0, 0, W, H);
+    
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+    
+      const nodes = [
+    
+        { x: 300, y: 50 },
+    
+        { x: 120, y: 200 },
+    
+        { x: 480, y: 200 }
+    
+      ];
+    
+      const edges =
+        this.computeEntanglementMatrix();
+    
+      //
+      // edges
+      //
+    
+      for (const edge of edges) {
+    
+        const a = nodes[edge.q1];
+        const b = nodes[edge.q2];
+    
+        ctx.strokeStyle =
+          '#4caf50';
+    
+        ctx.lineWidth =
+          1 + edge.strength * 10;
+    
+        ctx.beginPath();
+    
+        ctx.moveTo(a.x, a.y);
+    
+        ctx.lineTo(b.x, b.y);
+    
+        ctx.stroke();
+    
+        const mx =
+          (a.x + b.x) / 2;
+    
+        const my =
+          (a.y + b.y) / 2;
+    
+        ctx.fillStyle =
+          '#ffffff';
+    
+        ctx.fillText(
+          edge.strength.toFixed(2),
+          mx,
+          my
+        );
+      }
+    
+      //
+      // nodes
+      //
+    
+      for (let i = 0; i < 3; i++) {
+    
+        const n = nodes[i];
+    
+        ctx.fillStyle =
+          '#2f6fed';
+    
+        ctx.beginPath();
+    
+        ctx.arc(
+          n.x,
+          n.y,
+          20,
+          0,
+          Math.PI * 2
+        );
+    
+        ctx.fill();
+    
+        ctx.fillStyle =
+          '#ffffff';
+    
+        ctx.fillText(
+          `Q${i}`,
+          n.x - 8,
+          n.y + 5
+        );
+      }
+    },
+        
+    computeEntanglementMatrix() {
+    
+      const pairs = [
+        [0, 1],
+        [0, 2],
+        [1, 2]
+      ];
+    
+      const result = [];
+    
+      for (const [q1, q2] of pairs) {
+    
+        let correlation = 0;
+    
+        for (let basis = 0; basis < 8; basis++) {
+    
+          const p =
+            this.stateRe[basis] ** 2 +
+            this.stateIm[basis] ** 2;
+    
+          const b1 =
+            (basis >> (2 - q1)) & 1;
+    
+          const b2 =
+            (basis >> (2 - q2)) & 1;
+    
+          correlation +=
+            p * (b1 === b2 ? 1 : -1);
+        }
+    
+        result.push({
+          q1,
+          q2,
+          strength: Math.abs(correlation)
+        });
+      }
+    
+      return result;
+    },
+        
     computeBlochVectors() {
 
       const vectors = [];
@@ -742,7 +886,7 @@ const Home = {
 
       this.drawDensityMatrix();
 
-      //this.drawEntanglement();
+      this.drawEntanglement();
 
       this.drawBlochSpheres();
 
