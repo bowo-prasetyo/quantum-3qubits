@@ -44,3 +44,40 @@ canvas {
 pre {
   overflow-x: auto;
 }
+
+.gate-palette {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gate {
+  padding: 10px 14px;
+  background: #444;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.gate:active {
+  cursor: grabbing;
+}
+
+.circuit-dropzone {
+  min-height: 60px;
+  border: 2px dashed #2f6fed;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: rgba(47, 111, 237, 0.05);
+}
+
+.circuit-step {
+  padding: 8px 12px;
+  background: #2f6fed;
+  border-radius: 8px;
+  color: white;
+}
