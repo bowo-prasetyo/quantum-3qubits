@@ -188,13 +188,15 @@ const Home = {
           @drop="dropGate"
         >
       
-          <div
-            v-for="(step, index) in circuit"
-            :key="index"
-            class="circuit-step"
-          >
-            {{ step.gate }}
-          </div>
+        <div
+          v-for="(step, index) in circuit"
+          :key="index"
+          class="circuit-step"
+          @click="removeStep(index)"
+          title="Click to remove"
+        >
+          {{ step.gate }}
+        </div>
       
         </div>
       
@@ -468,6 +470,10 @@ const Home = {
   },
 
   methods: {
+    removeStep(index) {
+      this.circuit.splice(index, 1);
+    },
+        
     drawEntanglement() {
     
       const canvas =
