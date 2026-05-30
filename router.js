@@ -36,10 +36,6 @@ const Home = {
 </div>
 
       <div class="card">
-        <canvas ref="canvas" width="400" height="400"></canvas>
-      </div>
-
-      <div class="card">
 
   <h2>Probability Visualization</h2>
 
@@ -933,33 +929,58 @@ height="520"
     },
 
     drawDensityMatrix() {
-
+    
       const canvas = this.$refs.densityCanvas;
-
       const ctx = canvas.getContext('2d');
-
+    
       const size = 8;
-      const cell = 40;
-
+    
+      const cell =
+        Math.min(
+          canvas.width,
+          canvas.height
+        ) / size;
+    
       ctx.clearRect(
         0,
         0,
         canvas.width,
         canvas.height
       );
-
+    
       for (let i = 0; i < size; i++) {
+    
         for (let j = 0; j < size; j++) {
+    
+          const ar = this.stateRe[i];
+          const ai = this.stateIm[i];
+    
+          const br = this.stateRe[j];
+          const bi = -this.stateIm[j];
+    
+          const re =
+            ar * br -
+            ai * bi;
+    
+          const im =
+            ar * bi +
+            ai * br;
+    
+          const magnitude =
+            Math.sqrt(
+              re * re +
+              im * im
+            );
 
-          const value = Math.sqrt(
-            this.stateRe[i] * this.stateRe[j] +
-            this.stateIm[i] * this.stateIm[j]
-          );
-
-          const intensity = Math.min(255, value * 255);
-
-          ctx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
-
+          const phase =
+            Math.atan2(im, re);
+          
+          const hue =
+            ((phase / (2*Math.PI)) + 1) * 180;
+          
+          ctx.fillStyle =
+            `hsl(${hue},100%,${magnitude*50}%)`;
+    
           ctx.fillRect(
             j * cell,
             i * cell,
