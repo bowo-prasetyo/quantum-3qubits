@@ -943,10 +943,7 @@ height="520"
 
         im: this.stateIm
 
-      }, [
-        this.stateRe.buffer,
-        this.stateIm.buffer
-      ]);
+      });
     },
 
     applyGate(gate, targetQubit) {
@@ -965,10 +962,7 @@ height="520"
 
         im: this.stateIm
 
-      }, [
-        this.stateRe.buffer,
-        this.stateIm.buffer
-      ]);
+      });
     },
 
     measure() {
@@ -983,10 +977,7 @@ height="520"
 
         im: this.stateIm
 
-      }, [
-        this.stateRe.buffer,
-        this.stateIm.buffer
-      ]);
+      });
     },
 
     async reset() {
