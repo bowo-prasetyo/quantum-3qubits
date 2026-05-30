@@ -933,12 +933,175 @@ const Home = {
     },
 
     renderWebGL() {
-
+    
       const gl = this.gl;
-
+    
       if (!gl) return;
-
+    
+      gl.viewport(
+        0,
+        0,
+        gl.canvas.width,
+        gl.canvas.height
+      );
+    
+      gl.clearColor(0, 0, 0, 1);
+    
       gl.clear(gl.COLOR_BUFFER_BIT);
+    
+      const probs = [];
+    
+      for (let i = 0; i < 8; i++) {
+    
+        probs.push(
+    
+          this.stateRe[i] * this.stateRe[i] +
+    
+          this.stateIm[i] * this.stateIm[i]
+        );
+      }
+    
+      //
+      // Create vertices
+      //
+    
+      const vertices = [];
+    
+      const barWidth = 2 / 8;
+    
+      for (let i = 0; i < 8; i++) {
+    
+        const x0 =
+          -1 + i * barWidth;
+    
+        const x1 =
+          x0 + barWidth * 0.8;
+    
+        const y0 = -1;
+    
+        const y1 =
+          -1 + probs[i] * 2;
+    
+        vertices.push(
+    
+          x0, y0,
+          x1, y0,
+          x0, y1,
+    
+          x0, y1,
+          x1, y0,
+          x1, y1
+        );
+      }
+    
+      //
+      // Shader
+      //
+    
+      const vs = `
+        attribute vec2 pos;
+        void main() {
+          gl_Position =
+            vec4(pos,0.0,1.0);
+        }
+      `;
+    
+      const fs = `
+        precision mediump float;
+        void main() {
+          gl_FragColor =
+            vec4(
+              0.2,
+              0.8,
+              0.4,
+              1.0
+            );
+        }
+      `;
+    
+      const vert =
+        gl.createShader(
+          gl.VERTEX_SHADER
+        );
+    
+      gl.shaderSource(
+        vert,
+        vs
+      );
+    
+      gl.compileShader(vert);
+    
+      const frag =
+        gl.createShader(
+          gl.FRAGMENT_SHADER
+        );
+    
+      gl.shaderSource(
+        frag,
+        fs
+      );
+    
+      gl.compileShader(frag);
+    
+      const program =
+        gl.createProgram();
+    
+      gl.attachShader(
+        program,
+        vert
+      );
+    
+      gl.attachShader(
+        program,
+        frag
+      );
+    
+      gl.linkProgram(
+        program
+      );
+    
+      gl.useProgram(
+        program
+      );
+    
+      const buffer =
+        gl.createBuffer();
+    
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        buffer
+      );
+    
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(vertices),
+        gl.STATIC_DRAW
+      );
+    
+      const pos =
+        gl.getAttribLocation(
+          program,
+          'pos'
+        );
+    
+      gl.enableVertexAttribArray(
+        pos
+      );
+    
+      gl.vertexAttribPointer(
+        pos,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0
+      );
+    
+      gl.drawArrays(
+        gl.TRIANGLES,
+        0,
+        vertices.length / 2
+      );
     },
 
     drawDensityMatrix() {
