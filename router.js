@@ -1092,7 +1092,7 @@ const Home = {
 
       gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
 
-      const posLoc = gl.getAttribLocation(program, "pos");
+      posLoc = gl.getAttribLocation(program, "pos");
       gl.enableVertexAttribArray(posLoc);
       gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
 
