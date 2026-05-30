@@ -22,6 +22,8 @@ export async function saveState(
   circuit
 ) {
 
+  const db = await openDB();
+
   return new Promise((resolve, reject) => {
 
     const tx = db.transaction(
@@ -49,6 +51,8 @@ export async function saveState(
 }
 
 export async function loadState() {
+
+  const db = await openDB();
 
   return new Promise((resolve, reject) => {
 
