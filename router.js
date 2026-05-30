@@ -1,4 +1,3 @@
-
 if ('gpu' in navigator) {
   console.log('WebGPU supported');
 }
@@ -454,83 +453,72 @@ height="520"
   methods: {
     computeBlochVectors() {
 
-  const vectors = [];
+      const vectors = [];
 
-  for (let q = 0; q < 3; q++) {
+      for (let q = 0; q < 3; q++) {
 
-    const rho =
-      this.getReducedDensityMatrix(q);
+        const rho =
+          this.getReducedDensityMatrix(q);
 
-    console.log(
-    'qubit',
-    q,
-    JSON.stringify(rho)
-  );
-    
-    vectors.push({
+        vectors.push({
 
-      x: 2 * rho.rho01Re,
+          x: 2 * rho.rho01Re,
 
-      y: -2 * rho.rho01Im,
+          y: -2 * rho.rho01Im,
 
-      z: rho.rho00 - rho.rho11
+          z: rho.rho00 - rho.rho11
 
-    });
-  }
+        });
+      }
 
-      console.log(
-    'vectors',
-    vectors
-  );
-      
-  return vectors;
-},
-        
+      return vectors;
+    },
+
     drawSingleBlochSphere(canvas, x, y, z) {
-    
+
       const ctx = canvas.getContext('2d');
-    
+
       const W = canvas.width;
       const H = canvas.height;
-    
+
       ctx.clearRect(0, 0, W, H);
-    
+
       const cx = W / 2;
       const cy = H / 2;
-    
+
       const radius = Math.min(W, H) * 0.35;
-    
+
       const perspective = 0.35;
-    
+
       function project(px, py, pz) {
         return {
           x: cx + (px + py * perspective) * radius,
           y: cy - (pz + py * perspective) * radius
         };
       }
-    
+
       //
       // background
       //
-    
+
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, W, H);
-    
+
       //
       // sphere outline
       //
-    
+
       ctx.strokeStyle = '#666';
       ctx.lineWidth = 2;
-    
+
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.stroke();
-    
+
       //
       // equator
       //
-    
+
       ctx.beginPath();
       ctx.ellipse(
         cx,
@@ -542,71 +530,71 @@ height="520"
         Math.PI * 2
       );
       ctx.stroke();
-    
+
       //
       // axes
       //
-    
+
       ctx.strokeStyle = '#555';
-    
+
       {
-        const p1 = project(-1,0,0);
-        const p2 = project( 1,0,0);
-    
+        const p1 = project(-1, 0, 0);
+        const p2 = project(1, 0, 0);
+
         ctx.beginPath();
-        ctx.moveTo(p1.x,p1.y);
-        ctx.lineTo(p2.x,p2.y);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
-    
+
       {
-        const p1 = project(0,-1,0);
-        const p2 = project(0, 1,0);
-    
+        const p1 = project(0, -1, 0);
+        const p2 = project(0, 1, 0);
+
         ctx.beginPath();
-        ctx.moveTo(p1.x,p1.y);
-        ctx.lineTo(p2.x,p2.y);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
-    
+
       {
-        const p1 = project(0,0,-1);
-        const p2 = project(0,0, 1);
-    
+        const p1 = project(0, 0, -1);
+        const p2 = project(0, 0, 1);
+
         ctx.beginPath();
-        ctx.moveTo(p1.x,p1.y);
-        ctx.lineTo(p2.x,p2.y);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
-    
+
       //
       // labels
       //
-    
+
       ctx.fillStyle = 'white';
-    
-      const north = project(0,0,1);
-      const south = project(0,0,-1);
-    
+
+      const north = project(0, 0, 1);
+      const south = project(0, 0, -1);
+
       ctx.fillText('|0⟩', north.x - 10, north.y - 10);
       ctx.fillText('|1⟩', south.x - 10, south.y + 20);
-    
+
       //
       // bloch vector
       //
-    
+
       const tip = project(x, y, z);
-    
+
       ctx.strokeStyle = '#2f6fed';
       ctx.lineWidth = 4;
-    
+
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(tip.x, tip.y);
       ctx.stroke();
-    
+
       ctx.fillStyle = '#2f6fed';
-    
+
       ctx.beginPath();
       ctx.arc(
         tip.x,
@@ -616,50 +604,50 @@ height="520"
         Math.PI * 2
       );
       ctx.fill();
-    
+
       //
       // coordinates
       //
-    
+
       ctx.fillStyle = '#aaa';
-    
+
       ctx.fillText(
         `x=${x.toFixed(2)}`,
         10,
         15
       );
-    
+
       ctx.fillText(
         `y=${y.toFixed(2)}`,
         10,
         30
       );
-    
+
       ctx.fillText(
         `z=${z.toFixed(2)}`,
         10,
         45
       );
     },
-        
+
     drawBlochSpheres() {
 
       const vectors = this.computeBlochVectors();
-    
+
       this.drawSingleBlochSphere(
         this.$refs.bloch0,
         vectors[0].x,
         vectors[0].y,
         vectors[0].z
       );
-    
+
       this.drawSingleBlochSphere(
         this.$refs.bloch1,
         vectors[1].x,
         vectors[1].y,
         vectors[1].z
       );
-    
+
       this.drawSingleBlochSphere(
         this.$refs.bloch2,
         vectors[2].x,
@@ -667,85 +655,85 @@ height="520"
         vectors[2].z
       );
     },
-        
+
     getReducedDensityMatrix(qubit) {
-    
+
       let rho00Re = 0;
       let rho11Re = 0;
-    
+
       let rho01Re = 0;
       let rho01Im = 0;
-    
+
       for (let i = 0; i < 8; i++) {
-    
+
         const bitI = (i >> (2 - qubit)) & 1;
-    
+
         for (let j = 0; j < 8; j++) {
-    
+
           const bitJ = (j >> (2 - qubit)) & 1;
-    
+
           //
           // Trace out all other qubits
           //
-    
+
           let equal = true;
-    
+
           for (let k = 0; k < 3; k++) {
-    
+
             if (k === qubit) continue;
-    
+
             const bi = (i >> (2 - k)) & 1;
             const bj = (j >> (2 - k)) & 1;
-    
+
             if (bi !== bj) {
               equal = false;
               break;
             }
           }
-    
+
           if (!equal) continue;
-    
+
           const ar = this.stateRe[i];
           const ai = this.stateIm[i];
-    
+
           const br = this.stateRe[j];
           const bi = -this.stateIm[j];
-    
+
           const re =
             ar * br -
             ai * bi;
-    
+
           const im =
             ar * bi +
             ai * br;
-    
+
           if (bitI === 0 && bitJ === 0)
             rho00Re += re;
-    
+
           else if (bitI === 1 && bitJ === 1)
             rho11Re += re;
-    
+
           else if (bitI === 0 && bitJ === 1) {
-    
+
             rho01Re += re;
             rho01Im += im;
           }
         }
       }
-    
+
       return {
-    
+
         rho00: rho00Re,
-    
+
         rho11: rho11Re,
-    
+
         rho01Re,
-    
+
         rho01Im
-    
+
       };
     },
-    
+
     redrawAll() {
 
       this.drawProbabilities();
@@ -808,43 +796,43 @@ height="520"
     },
 
     drawDensityMatrix() {
-    
+
       const canvas = this.$refs.densityCanvas;
       const ctx = canvas.getContext('2d');
-    
+
       const size = 8;
-    
+
       const cell =
         Math.min(
           canvas.width,
           canvas.height
         ) / size;
-    
+
       ctx.clearRect(
         0,
         0,
         canvas.width,
         canvas.height
       );
-    
+
       for (let i = 0; i < size; i++) {
-    
+
         for (let j = 0; j < size; j++) {
-    
+
           const ar = this.stateRe[i];
           const ai = this.stateIm[i];
-    
+
           const br = this.stateRe[j];
           const bi = -this.stateIm[j];
-    
+
           const re =
             ar * br -
             ai * bi;
-    
+
           const im =
             ar * bi +
             ai * br;
-    
+
           const magnitude =
             Math.sqrt(
               re * re +
@@ -853,13 +841,13 @@ height="520"
 
           const phase =
             Math.atan2(im, re);
-          
+
           const hue =
-            ((phase / (2*Math.PI)) + 1) * 180;
-          
+            ((phase / (2 * Math.PI)) + 1) * 180;
+
           ctx.fillStyle =
             `hsl(${hue},100%,${magnitude*50}%)`;
-    
+
           ctx.fillRect(
             j * cell,
             i * cell,
