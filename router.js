@@ -1,3 +1,4 @@
+
 if ('gpu' in navigator) {
   console.log('WebGPU supported');
 }
@@ -415,20 +416,30 @@ const Home = {
   },
 
   async mounted() {
+    this.requestId = 0;
+    this.pending = new Map();
     this.initWebGL();
     this.renderWebGL();
     this.worker = new Worker('./worker.js');
 
-    this.worker.onmessage = async (e) => {
-
-      this.stateRe = e.data.re;
-
-      this.stateIm = e.data.im;
-
-      if (e.data.measured !== undefined) {
-        this.measurement = e.data.measured;
+    this.worker.onmessage = (e) => {
+      const { id, re, im, measured } = e.data;
+    
+      if (this.pending.has(id)) {
+        this.pending.get(id)({
+          re,
+          im,
+          measured
+        });
+        this.pending.delete(id);
+        return;
       }
-
+    
+      // fallback (non-circuit calls)
+      this.stateRe = re;
+      this.stateIm = im;
+      this.measurement = measured || this.measurement;
+    
       this.redrawAll();
 
       await window.db.saveState(
@@ -1296,40 +1307,50 @@ const Home = {
     },
 
     applyCNOT(control = 0, target = 1) {
-
-      this.worker.postMessage({
-
-        type: 'cnot',
-
-        control,
-
-        target,
-
-        qubitCount: 3,
-
-        re: this.stateRe,
-
-        im: this.stateIm
-
+      return new Promise((resolve) => {
+        const id = this.requestId++;
+    
+        this.pending.set(id, resolve);
+  
+        this.worker.postMessage({
+  
+          type: 'cnot',
+  
+          control,
+  
+          target,
+  
+          qubitCount: 3,
+  
+          re: this.stateRe,
+  
+          im: this.stateIm
+  
+        });
       });
     },
 
     applyGate(gate, targetQubit) {
-
-      this.worker.postMessage({
-
-        type: 'gate',
-
-        gate,
-
-        targetQubit,
-
-        qubitCount: 3,
-
-        re: this.stateRe,
-
-        im: this.stateIm
-
+      return new Promise((resolve) => {
+        const id = this.requestId++;
+    
+        this.pending.set(id, resolve);
+  
+        this.worker.postMessage({
+  
+          type: 'gate',
+  
+          gate,
+  
+          targetQubit,
+  
+          qubitCount: 3,
+  
+          re: this.stateRe,
+  
+          im: this.stateIm
+  
+        });
       });
     },
 
