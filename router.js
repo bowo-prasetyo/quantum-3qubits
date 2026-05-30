@@ -442,7 +442,7 @@ const Home = {
     
       this.redrawAll();
 
-      await window.db.saveState(
+      window.db.saveState(
         this.stateRe,
         this.stateIm,
         this.circuit
@@ -451,15 +451,19 @@ const Home = {
 
     this.redrawAll();
 
-    const saved = await window.db.loadState();
-
-    if (saved) {
-
-      this.stateRe = saved.stateRe;
-
-      this.stateIm = saved.stateIm;
-
-      this.circuit = saved.circuit;
+    try {
+      const saved = await window.db.loadState();
+  
+      if (saved) {
+  
+        this.stateRe = saved.stateRe;
+  
+        this.stateIm = saved.stateIm;
+  
+        this.circuit = saved.circuit;
+      }
+    } catch (e) {
+      console.warn("Failed to load state:", e);
     }
   },
 
