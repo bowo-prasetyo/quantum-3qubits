@@ -161,25 +161,15 @@ const Home = {
         <h2>Circuit Editor</h2>
       
         <div class="gate-palette">
-      
-          <div
-            class="gate"
-            draggable="true"
-            @dragstart="startDrag('H')"
-          >H</div>
-      
-          <div
-            class="gate"
-            draggable="true"
-            @dragstart="startDrag('X')"
-          >X</div>
-      
-          <div
-            class="gate"
-            draggable="true"
-            @dragstart="startDrag('CNOT')"
-          >CNOT</div>
-      
+    
+          <div class="gate" draggable="true" @dragstart="startDrag('H')">H</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('X')">X</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('Y')">Y</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('Z')">Z</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('S')">S</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('T')">T</div>
+          <div class="gate" draggable="true" @dragstart="startDrag('CNOT')">CNOT</div>
+
         </div>
       
         <div
