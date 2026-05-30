@@ -1002,20 +1002,20 @@ const Home = {
         attribute vec3 pos;
         attribute float pointSize;
         attribute vec3 color;
-      
+    
         varying vec3 vColor;
-      
+    
         void main() {
+    
           vColor = color;
-      
-          float perspective = 1.2 / (2.0 - pos.z);
-      
-          gl_Position = vec4(pos.xy * perspective, 0.0, 1.0);
-      
+    
+          gl_Position =
+            vec4(pos * 0.6, 1.0);
+    
           gl_PointSize = pointSize;
         }
       `;
-            
+    
       const fs = `
         precision mediump float;
     
@@ -1052,7 +1052,7 @@ const Home = {
       gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     
-      let posLoc = gl.getAttribLocation(program, "pos");
+      const posLoc = gl.getAttribLocation(program, "pos");
       gl.enableVertexAttribArray(posLoc);
       gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
     
@@ -1074,35 +1074,76 @@ const Home = {
       gl.enableVertexAttribArray(colorLoc);
       gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
 
-      // AXES (line segments)
-      const axisVertices = new Float32Array([
-        // X axis (red)
-        -1, 0, 0,   1, 0, 0,
+      const axisVertices = [
+        // X axis (red conceptually)
+        -1, 0, 0,
+         1, 0, 0,
       
         // Y axis (green)
-        0, -1, 0,   0, 1, 0,
+        0, -1, 0,
+        0,  1, 0,
       
         // Z axis (blue)
-        0, 0, -1,   0, 0, 1
-      ]);
+        0, 0, -1,
+        0, 0,  1
+      ];
+
+      const axisVS = `
+        attribute vec3 pos;
+      
+        void main() {
+          gl_Position = vec4(pos * 0.6, 1.0);
+        }
+      `;
+      
+      const axisFS = `
+        precision mediump float;
+        uniform vec3 color;
+      
+        void main() {
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      const axisProgram = gl.createProgram();
+
+      const axisVert = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(axisVert, axisVS);
+      gl.compileShader(axisVert);
+      
+      const axisFrag = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(axisFrag, axisFS);
+      gl.compileShader(axisFrag);
+      
+      gl.attachShader(axisProgram, axisVert);
+      gl.attachShader(axisProgram, axisFrag);
+      gl.linkProgram(axisProgram);
 
       const axisBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, axisVertices, gl.STATIC_DRAW);
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
-
-      posLoc = gl.getAttribLocation(program, "pos");
-      gl.enableVertexAttribArray(posLoc);
-      gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
-
-      gl.lineWidth(2);
-      
-      // draw axes
-      gl.drawArrays(gl.LINES, 0, 6);
-
-      // draw quantum states (existing code)
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
+            
       gl.drawArrays(gl.POINTS, 0, 8);
+
+      gl.useProgram(axisProgram);
+
+      const axisPosLoc = gl.getAttribLocation(axisProgram, "pos");
+      gl.enableVertexAttribArray(axisPosLoc);
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, axisBuffer);
+      gl.vertexAttribPointer(axisPosLoc, 3, gl.FLOAT, false, 0, 0);
+      
+      // X axis (red)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 1.0, 0.2, 0.2);
+      gl.drawArrays(gl.LINES, 0, 2);
+      
+      // Y axis (green)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 1.0, 0.2);
+      gl.drawArrays(gl.LINES, 2, 2);
+      
+      // Z axis (blue)
+      gl.uniform3f(gl.getUniformLocation(axisProgram, "color"), 0.2, 0.4, 1.0);
+      gl.drawArrays(gl.LINES, 4, 2);
     },
     
     drawDensityMatrix() {
