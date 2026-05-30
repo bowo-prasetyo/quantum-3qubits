@@ -428,14 +428,16 @@ height="520"
         this.measurement = e.data.measured;
       }
 
+      this.redrawAll();
+
       await window.db.saveState(
         this.stateRe,
         this.stateIm,
         this.circuit
       );
-
-      this.redrawAll();
     };
+
+    this.redrawAll();
 
     const saved = await window.db.loadState();
 
@@ -447,8 +449,6 @@ height="520"
 
       this.circuit = saved.circuit;
     }
-
-    this.redrawAll();
   },
 
   methods: {
@@ -998,13 +998,13 @@ height="520"
 
       this.measurement = '-';
 
+      this.redrawAll();
+
       await window.db.saveState(
         this.stateRe,
         this.stateIm,
         this.circuit
       );
-
-      this.redrawAll();
 
     },
 
