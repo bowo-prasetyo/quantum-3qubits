@@ -34,7 +34,7 @@ export async function saveState(
     const store = tx.objectStore('states');
 
     store.put({
-      id: 'latest',
+      qubit: 'latest',
 
       re: Array.from(stateRe),
 
