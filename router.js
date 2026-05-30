@@ -1002,20 +1002,20 @@ const Home = {
         attribute vec3 pos;
         attribute float pointSize;
         attribute vec3 color;
-    
+      
         varying vec3 vColor;
-    
+      
         void main() {
-    
           vColor = color;
-    
-          gl_Position =
-            vec4(pos * 0.6, 1.0);
-    
+      
+          float perspective = 1.2 / (2.0 - pos.z);
+      
+          gl_Position = vec4(pos.xy * perspective, 0.0, 1.0);
+      
           gl_PointSize = pointSize;
         }
       `;
-    
+            
       const fs = `
         precision mediump float;
     
