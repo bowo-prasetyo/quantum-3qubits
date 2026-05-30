@@ -48,11 +48,10 @@ function measureState(re, im, qubitCount) {
 
     im: collapsedIm,
 
-    measured:
-      '|' +
+    measured: '|' +
       measuredIndex
-        .toString(2)
-        .padStart(qubitCount, '0') +
+      .toString(2)
+      .padStart(qubitCount, '0') +
       '⟩'
   };
 }
@@ -246,19 +245,44 @@ const gates = {
   ],
 
   S: [
-    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
-    [{ re: 0, im: 0 }, { re: 0, im: 1 }]
+    [{
+      re: 1,
+      im: 0
+    }, {
+      re: 0,
+      im: 0
+    }],
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: 0,
+      im: 1
+    }]
   ],
 
   T: [
-    [{ re: 1, im: 0 }, { re: 0, im: 0 }],
-    [{ re: 0, im: 0 }, { re: Math.cos(Math.PI/4), im: Math.sin(Math.PI/4) }]
+    [{
+      re: 1,
+      im: 0
+    }, {
+      re: 0,
+      im: 0
+    }],
+    [{
+      re: 0,
+      im: 0
+    }, {
+      re: Math.cos(Math.PI / 4),
+      im: Math.sin(Math.PI / 4)
+    }]
   ]
 };
 
 self.onmessage = (e) => {
 
   const {
+    id,
     type,
     gate,
     targetQubit,
@@ -271,22 +295,23 @@ self.onmessage = (e) => {
 
   if (type === 'measure') {
 
-  const result = measureState(
-    re,
-    im,
-    qubitCount
-  );
+    const result = measureState(
+      re,
+      im,
+      qubitCount
+    );
 
-  self.postMessage({
-    re: result.re,
-    im: result.im,
-    measured: result.measured
-  }, [
-    result.re.buffer,
-    result.im.buffer
-  ]);
-}
-  
+    self.postMessage({
+      id,
+      re: result.re,
+      im: result.im,
+      measured: result.measured
+    }, [
+      result.re.buffer,
+      result.im.buffer
+    ]);
+  }
+
   if (type === 'gate') {
 
     const result = applySingleQubitGate(
