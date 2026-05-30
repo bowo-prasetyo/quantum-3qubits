@@ -472,6 +472,11 @@ height="520"
     });
   }
 
+      console.log(
+    'vectors',
+    vectors
+  );
+      
   return vectors;
 },
         
