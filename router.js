@@ -486,6 +486,36 @@ const Home = {
     }
   },
 
+  beforeUnmount() {
+  
+    const canvas = this.$refs.webglCanvas;
+  
+    if (canvas) {
+      canvas.removeEventListener(
+        'mousedown',
+        this.onMouseDown
+      );
+  
+      canvas.removeEventListener(
+        'wheel',
+        this.onWheel
+      );
+    }
+  
+    window.removeEventListener(
+      'mouseup',
+      this.onMouseUp
+    );
+  
+    window.removeEventListener(
+      'mousemove',
+      this.onMouseMove
+    );
+  
+    if (this.worker)
+      this.worker.terminate();
+  },
+
   async mounted() {
     this.requestId = 0;
     this.pending = new Map();
@@ -1106,14 +1136,41 @@ const Home = {
       const vert = gl.createShader(gl.VERTEX_SHADER);
       gl.shaderSource(vert, this.vs);
       gl.compileShader(vert);
-    
+
+      if (!gl.getShaderParameter(
+        vert,
+        gl.COMPILE_STATUS
+      )) {  
+        console.error(
+          gl.getShaderInfoLog(vert)
+        );
+      }
+      
       const frag = gl.createShader(gl.FRAGMENT_SHADER);
       gl.shaderSource(frag, this.fs);
       gl.compileShader(frag);
+
+      if (!gl.getShaderParameter(
+        frag,
+        gl.COMPILE_STATUS
+      )) {  
+        console.error(
+          gl.getShaderInfoLog(frag)
+        );
+      }
     
       gl.attachShader(this.program, vert);
       gl.attachShader(this.program, frag);
       gl.linkProgram(this.program);
+
+      if (!gl.getProgramParameter(
+        this.program,
+        gl.LINK_STATUS
+      )) {  
+        console.error(
+          gl.getProgramInfoLog(this.program)
+        );
+      }
 
       this.posBuffer = gl.createBuffer();
       this.sizeBuffer = gl.createBuffer();
@@ -1154,7 +1211,10 @@ const Home = {
     
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       gl.clearColor(0, 0, 0, 1);
-      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.clear(
+        gl.COLOR_BUFFER_BIT |
+        gl.DEPTH_BUFFER_BIT
+      );
     
       const vertices = [];
       const sizes = [];
@@ -1223,7 +1283,7 @@ const Home = {
 
       const canvas = this.$refs.densityCanvas;
       const ctx = canvas.getContext('2d');
-
+            
       const size = 8;
 
       const cell =
@@ -1233,6 +1293,14 @@ const Home = {
         ) / size;
 
       ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      ctx.fillStyle = '#000';
+      ctx.fillRect(
         0,
         0,
         canvas.width,
@@ -1396,12 +1464,10 @@ const Home = {
       this.stateRe = new Float64Array([
         1, 0, 0, 0, 0, 0, 0, 0
       ]);
-
       this.stateIm = new Float64Array(8);
-
       this.measurement = '-';
-
       this.redrawAll();
+      this.circuit = [];
 
       await window.db.saveState(
         this.stateRe,
