@@ -211,14 +211,6 @@ const Home = {
         </button>
       
       </div>
-      
-      <div class="card">
-        <h3>Quantum State</h3>
-
-        <pre>{{ prettyState }}</pre>
-
-        <p>Measurement: {{ measurement }}</p>
-      </div>
 
       <div class="card">
       
@@ -269,6 +261,14 @@ const Home = {
           Run Circuit
         </button>
       
+      </div>
+      
+      <div class="card">
+        <h3>Quantum State</h3>
+
+        <pre>{{ prettyState }}</pre>
+
+        <p>Measurement: {{ measurement }}</p>
       </div>
       
       <div class="card">
@@ -401,13 +401,15 @@ const Home = {
           The probability chart displays the measurement probability of all eight basis states.
           Taller bars indicate a higher chance of observing that state during measurement.
         </p>
-      
+
         <p>
-          <strong>Entanglement Graph</strong><br>
-          The entanglement graph visualizes correlations between qubits.
-          Stronger connections indicate greater quantum correlation between pairs of qubits.
+          <strong>Correlation Graph</strong><br>
+          The correlation graph visualizes measurement correlations between qubits.
+          Stronger connections indicate that pairs of qubits tend to produce related
+          measurement outcomes. Correlation often appears in entangled states but is
+          not itself a direct measurement of entanglement.
         </p>
-      
+
         <p>
           <strong>WebGL Visualization</strong><br>
           The WebGL view uses GPU acceleration to render quantum-state visualizations more efficiently.
@@ -425,7 +427,126 @@ const Home = {
           The latest observed classical state is displayed here, such as:
           |000⟩, |001⟩, |010⟩, |011⟩, |100⟩, |101⟩, |110⟩ or |111⟩.
         </p>
-      
+
+        <p>
+          <strong>Quantum Circuit</strong><br>
+          A quantum circuit is a sequence of quantum operations applied to qubits.
+          Complex quantum algorithms are built by combining many gates into circuits.
+          The Circuit Editor allows gates to be arranged and executed automatically.
+        </p>
+        
+        <p>
+          <strong>Circuit Step</strong><br>
+          Each step in the circuit represents one quantum operation.
+          Operations are executed in order from left to right.
+          Clicking a circuit step removes it from the circuit.
+        </p>
+        
+        <p>
+          <strong>Quantum Correlation</strong><br>
+          Quantum correlation describes how measurement outcomes of different qubits
+          are related. Entangled qubits often exhibit stronger correlations than
+          independent qubits.
+        </p>
+        
+        <p>
+          <strong>Correlation Strength</strong><br>
+          The correlation graph displays a simple estimate of how strongly pairs
+          of qubits are related. Larger values indicate stronger relationships
+          between measurement outcomes.
+        </p>
+        
+        <p>
+          <strong>Reduced State</strong><br>
+          An individual qubit inside a multi-qubit system is described by a reduced
+          quantum state. This state is obtained by mathematically ignoring the
+          remaining qubits through an operation called a partial trace.
+        </p>
+        
+        <p>
+          <strong>Mixed State</strong><br>
+          A mixed state represents uncertainty about a quantum system.
+          Even when the overall system is perfectly known, an individual qubit can
+          appear mixed if it is entangled with other qubits.
+        </p>
+        
+        <p>
+          <strong>Quantum Phase</strong><br>
+          Quantum amplitudes contain both magnitude and phase.
+          Two states with identical probabilities may still behave differently
+          because of phase relationships that affect interference.
+        </p>
+        
+        <p>
+          <strong>Phase Visualization</strong><br>
+          In the WebGL visualization, colors represent quantum phase.
+          Different colors correspond to different phase angles of the complex
+          amplitudes associated with each basis state.
+        </p>
+        
+        <p>
+          <strong>Basis State Cube</strong><br>
+          The WebGL visualization places the eight basis states at the corners
+          of a three-dimensional cube. Each corner corresponds to one classical
+          binary state from |000⟩ to |111⟩.
+        </p>
+        
+        <p>
+          <strong>Amplitude Marker Size</strong><br>
+          In the WebGL view, larger points indicate higher probability amplitudes.
+          States with greater probability appear larger than states with very small
+          amplitudes.
+        </p>
+        
+        <p>
+          <strong>3D Camera Controls</strong><br>
+          The WebGL visualization supports interactive camera movement.
+          Dragging rotates the view while the mouse wheel zooms in and out,
+          allowing the quantum state to be examined from different angles.
+        </p>
+        
+        <p>
+          <strong>GPU Acceleration</strong><br>
+          Modern graphics processors (GPUs) can render large numbers of visual
+          elements efficiently. The simulator uses WebGL and can detect WebGPU
+          support for future high-performance quantum visualizations.
+        </p>
+        
+        <p>
+          <strong>Web Worker</strong><br>
+          Quantum calculations are performed inside a background worker thread.
+          This keeps the user interface responsive while quantum operations are
+          being executed.
+        </p>
+        
+        <p>
+          <strong>State Persistence</strong><br>
+          The simulator automatically saves the current quantum state and circuit.
+          When the page is reopened, the previous session can be restored without
+          rebuilding the circuit manually.
+        </p>
+        
+        <p>
+          <strong>Hilbert Space</strong><br>
+          The Hilbert space is the mathematical space that contains all possible
+          quantum states. A system of three qubits has 2³ = 8 basis states and
+          therefore occupies an eight-dimensional Hilbert space.
+        </p>
+        
+        <p>
+          <strong>Complex Numbers</strong><br>
+          Quantum amplitudes are complex numbers consisting of real and imaginary
+          components. These values determine both measurement probabilities and
+          phase relationships within the quantum system.
+        </p>
+        
+        <p>
+          <strong>Wavefunction Collapse</strong><br>
+          Before measurement, the quantum state may exist as a superposition of
+          multiple basis states. Measurement collapses the wavefunction into one
+          observed classical outcome.
+        </p>
+
       </div>
     </div>
   `,
