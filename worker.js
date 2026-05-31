@@ -311,6 +311,7 @@ self.onmessage = (e) => {
   if (type === 'gate') {
 
     const result = applySingleQubitGate(
+      id,
       re,
       im,
       gates[gate],
@@ -327,6 +328,7 @@ self.onmessage = (e) => {
   if (type === 'cnot') {
 
     const result = applyCNOT(
+      id,
       re,
       im,
       control,
