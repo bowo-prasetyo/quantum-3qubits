@@ -56,10 +56,6 @@ function measureState(re, im, qubitCount) {
   };
 }
 
-function probability(re, im) {
-  return re * re + im * im;
-}
-
 function applySingleQubitGate(
   re,
   im,
