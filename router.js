@@ -1705,19 +1705,24 @@ const Manual = {
         </p>
       
         <ul>
-          <li>Single-qubit gates</li>
+          <li>Single-qubit gates (H, X, Y, Z, S, T)</li>
+          <li>Controlled-NOT (CNOT) operations</li>
           <li>Quantum superposition</li>
-          <li>Quantum phase</li>
+          <li>Quantum phase manipulation</li>
           <li>Measurement collapse</li>
-          <li>Two-qubit entanglement</li>
-          <li>Three-qubit entanglement</li>
           <li>Bell states</li>
           <li>GHZ states</li>
-          <li>CNOT operations</li>
-          <li>Reduced density matrices</li>
-          <li>Bloch sphere visualization</li>
+          <li>Two-qubit and three-qubit correlations</li>
+          <li>Probability visualization</li>
           <li>Density matrix visualization</li>
-          <li>Entanglement visualization</li>
+          <li>Reduced density matrices</li>
+          <li>Three Bloch sphere visualizations</li>
+          <li>Correlation graph visualization</li>
+          <li>Interactive quantum circuit editor</li>
+          <li>3D WebGL state visualization</li>
+          <li>Quantum phase color visualization</li>
+          <li>GPU-accelerated rendering</li>
+          <li>Automatic session persistence</li>
         </ul>
       </div>
       
@@ -2175,6 +2180,239 @@ const Manual = {
         <p>
           Off-diagonal entries indicate quantum coherence
           and interference effects.
+        </p>
+      
+      </div>
+
+      <div class="card">
+
+        <h2>Use Case 12 — Correlation Graph Analysis</h2>
+      
+        <p>
+          This demonstrates how quantum correlations appear between qubits.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Observe how relationships between qubits change after entangling operations.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Create a Bell State</li>
+          <li>Observe the Correlation Graph</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          A strong connection appears between qubit 0 and qubit 1.
+          This indicates that their measurement outcomes are highly correlated.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 13 — Entanglement and Mixed States</h2>
+      
+        <p>
+          This demonstrates how an individual qubit can appear mixed even when
+          the complete quantum system is in a pure state.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Observe the effect of entanglement on the Bloch spheres.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Create a Bell State</li>
+          <li>Observe the Bloch spheres</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          The Bloch vectors of the entangled qubits move toward the center
+          of their spheres.
+        </p>
+      
+        <p>
+          This indicates that each qubit individually behaves like a mixed state,
+          even though the overall two-qubit system remains perfectly defined.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 14 — WebGL Quantum State Visualization</h2>
+      
+        <p>
+          This demonstrates the three-dimensional visualization of the quantum state.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Understand how basis states, amplitudes and phases are represented visually.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Apply various gates</li>
+          <li>Observe the WebGL Visualization</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          Eight points appear at the corners of a cube,
+          corresponding to the basis states |000⟩ through |111⟩.
+        </p>
+      
+        <p>
+          Larger points indicate larger probabilities.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 15 — Quantum Phase Visualization</h2>
+      
+        <p>
+          This demonstrates how quantum phase affects the visualization.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Observe how phase-changing gates modify the colors of basis states.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Press Reset</li>
+          <li>Press H on Qubit 0</li>
+          <li>Press S or T</li>
+          <li>Observe the WebGL Visualization</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          Probability bars may remain unchanged while colors in the WebGL view change.
+        </p>
+      
+        <p>
+          This demonstrates that quantum phase can change without immediately
+          affecting measurement probabilities.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 16 — 3D Camera Exploration</h2>
+      
+        <p>
+          This demonstrates interactive exploration of the quantum-state cube.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          View the quantum state from different perspectives.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Drag the mouse over the WebGL visualization</li>
+          <li>Use the mouse wheel to zoom</li>
+          <li>Observe the basis-state cube from different angles</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          The cube rotates and zooms smoothly, making it easier
+          to inspect the quantum-state distribution.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 17 — Circuit Editor</h2>
+      
+        <p>
+          This demonstrates how quantum operations can be assembled into reusable circuits.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Build and execute a sequence of quantum gates automatically.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Select a qubit</li>
+          <li>Drag gates into the circuit area</li>
+          <li>Add multiple circuit steps</li>
+          <li>Press Run Circuit</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          The circuit executes sequentially and produces the same result
+          as manually applying the gates one by one.
+        </p>
+      
+      </div>
+      
+      <div class="card">
+      
+        <h2>Use Case 18 — Session Persistence</h2>
+      
+        <p>
+          This demonstrates automatic state saving.
+        </p>
+      
+        <p><strong>Objective:</strong></p>
+      
+        <p>
+          Verify that the simulator remembers the current session.
+        </p>
+      
+        <p><strong>Steps:</strong></p>
+      
+        <ol>
+          <li>Create any quantum state</li>
+          <li>Add several circuit steps</li>
+          <li>Refresh the page</li>
+        </ol>
+      
+        <p><strong>Expected Result:</strong></p>
+      
+        <p>
+          The quantum state and circuit are automatically restored
+          when the application reloads.
         </p>
       
       </div>
