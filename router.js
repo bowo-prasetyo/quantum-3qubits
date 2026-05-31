@@ -161,6 +161,7 @@ const Home = {
       
         <h3>Qubit 0</h3>
       
+        <button @click="applyGate('I', 0)">I</button>
         <button @click="applyGate('H', 0)">H</button>
         <button @click="applyGate('X', 0)">X</button>
         <button @click="applyGate('Y', 0)">Y</button>
@@ -170,6 +171,7 @@ const Home = {
       
         <h3>Qubit 1</h3>
       
+        <button @click="applyGate('I', 1)">I</button>
         <button @click="applyGate('H', 1)">H</button>
         <button @click="applyGate('X', 1)">X</button>
         <button @click="applyGate('Y', 1)">Y</button>
@@ -179,6 +181,7 @@ const Home = {
 
         <h3>Qubit 2</h3>
 
+        <button @click="applyGate('I', 2)">I</button>
         <button @click="applyGate('H', 2)">H</button>
         <button @click="applyGate('X', 2)">X</button>
         <button @click="applyGate('Y', 2)">Y</button>
@@ -223,6 +226,7 @@ const Home = {
       
         <div class="gate-palette">
     
+          <div class="gate" draggable="true" @dragstart="startDrag('I')">I</div>
           <div class="gate" draggable="true" @dragstart="startDrag('H')">H</div>
           <div class="gate" draggable="true" @dragstart="startDrag('X')">X</div>
           <div class="gate" draggable="true" @dragstart="startDrag('Y')">Y</div>
