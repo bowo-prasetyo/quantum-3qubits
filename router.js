@@ -1,5 +1,9 @@
 
-if ('gpu' in navigator) {
+const adapter =
+  await navigator.gpu?.requestAdapter();
+
+const supported = !!adapter;
+if (supported) {
   console.log('WebGPU supported');
 }
 
@@ -575,22 +579,19 @@ const Home = {
       );
     };
 
-    this.redrawAll();
-
     try {
       const saved = await window.db.loadState();
-  
+    
       if (saved) {
-  
         this.stateRe = saved.stateRe;
-  
         this.stateIm = saved.stateIm;
-  
         this.circuit = saved.circuit;
+    
+        this.redrawAll();
       }
     } catch (e) {
       console.warn("Failed to load state:", e);
-    }
+    }        
   },
 
   methods: {
@@ -615,6 +616,8 @@ const Home = {
     
       this.camera.rotY += dx * 0.01;
       this.camera.rotX += dy * 0.01;
+
+      this.renderWebGL();
     },
     
     onWheel(e) {
