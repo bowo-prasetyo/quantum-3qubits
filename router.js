@@ -681,7 +681,7 @@ const Home = {
       
         this.pending.delete(id);
       
-        await window.db.saveState(
+        window.db.saveState(
           this.stateRe,
           this.stateIm,
           this.circuit
