@@ -503,17 +503,34 @@ const Home = {
 
     this.worker.onmessage = (e) => {
       const { id, re, im, measured } = e.data;
-    
+      
       if (this.pending.has(id)) {
+      
+        this.stateRe = re;
+        this.stateIm = im;
+      
+        if (measured)
+          this.measurement = measured;
+      
+        this.redrawAll();
+      
         this.pending.get(id)({
           re,
           im,
           measured
         });
+      
         this.pending.delete(id);
+      
+        await window.db.saveState(
+          this.stateRe,
+          this.stateIm,
+          this.circuit
+        );
+      
         return;
       }
-    
+            
       // fallback (non-circuit calls)
       this.stateRe = re;
       this.stateIm = im;
@@ -1362,12 +1379,16 @@ const Home = {
     },
 
     measure() {
-
-      this.worker.postMessage({
-        type: 'measure',
-        qubitCount: 3,
-        re: this.stateRe,
-        im: this.stateIm
+      return new Promise((resolve) => {
+        const id = this.requestId++;
+        this.pending.set(id, resolve);
+        this.worker.postMessage({
+          id,
+          type: 'measure',
+          qubitCount: 3,
+          re: this.stateRe,
+          im: this.stateIm
+        });
       });
     },
 
