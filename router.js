@@ -1020,21 +1020,11 @@ const Home = {
     },
 
     async createGHZState() {
-
       await this.applyGate('H', 0);
-
-      setTimeout(async () => {
-
-        await this.applyCNOT(0, 1);
-
-        setTimeout(async () => {
-
-          await this.applyCNOT(1, 2);
-
-        }, 50);
-
-      }, 50);
+      await this.applyCNOT(0, 1);
+      await this.applyCNOT(1, 2);
     },
+    
     initWebGL() {
 
       const canvas = this.$refs.webglCanvas;
@@ -1112,6 +1102,13 @@ const Home = {
       this.sizeBuffer = gl.createBuffer();
       this.colorBuffer = gl.createBuffer();
 
+      this.uMV = gl.getUniformLocation(this.program, "uModelView");
+      this.uP = gl.getUniformLocation(this.program, "uProjection");      
+
+      this.posLoc = gl.getAttribLocation(this.program, "pos");
+      this.sizeLoc = gl.getAttribLocation(this.program, "pointSize");
+      this.colorLoc = gl.getAttribLocation(this.program, "color");
+
     },
     
     renderWebGL() {
@@ -1178,35 +1175,29 @@ const Home = {
       
       gl.useProgram(this.program);
 
-      const uMV = gl.getUniformLocation(this.program, "uModelView");
-      const uP = gl.getUniformLocation(this.program, "uProjection");
-      
-      gl.uniformMatrix4fv(uMV, false, modelView);
-      gl.uniformMatrix4fv(uP, false, projection);
+      gl.uniformMatrix4fv(this.uMV, false, modelView);
+      gl.uniformMatrix4fv(this.uP, false, projection);
             
       // POSITION
       gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     
-      const posLoc = gl.getAttribLocation(this.program, "pos");
-      gl.enableVertexAttribArray(posLoc);
-      gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.posLoc);
+      gl.vertexAttribPointer(this.posLoc, 3, gl.FLOAT, false, 0, 0);
     
       // SIZE
       gl.bindBuffer(gl.ARRAY_BUFFER, this.sizeBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW);
     
-      const sizeLoc = gl.getAttribLocation(this.program, "pointSize");
-      gl.enableVertexAttribArray(sizeLoc);
-      gl.vertexAttribPointer(sizeLoc, 1, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.sizeLoc);
+      gl.vertexAttribPointer(this.sizeLoc, 1, gl.FLOAT, false, 0, 0);
     
       // COLOR
       gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     
-      const colorLoc = gl.getAttribLocation(this.program, "color");
-      gl.enableVertexAttribArray(colorLoc);
-      gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.colorLoc);
+      gl.vertexAttribPointer(this.colorLoc, 3, gl.FLOAT, false, 0, 0);
             
       gl.drawArrays(gl.POINTS, 0, 8);
     },
@@ -1283,8 +1274,6 @@ const Home = {
       
       for (const step of this.circuit) {
 
-        this.currentAnimatingGate = step;
-
         if (step.gate === 'CNOT') {
 
           await this.applyCNOT(
@@ -1301,8 +1290,6 @@ const Home = {
 
         await new Promise(r => setTimeout(r, 500));
       }
-
-      this.currentAnimatingGate = null;
     },
 
     startDrag(gate) {
@@ -1337,35 +1324,23 @@ const Home = {
       this.draggingGate = null;
     },
         
-    createBellState() {
-
-      this.applyGate('H', 0);
-
-      setTimeout(() => {
-        this.applyCNOT(0, 1);
-      }, 50);
+    async createBellState() {
+      await this.applyGate('H', 0);
+      await this.applyCNOT(0, 1);
     },
 
     applyCNOT(control = 0, target = 1) {
       return new Promise((resolve) => {
         const id = this.requestId++;
-    
         this.pending.set(id, resolve);
-  
         this.worker.postMessage({
-  
+          id,
           type: 'cnot',
-  
           control,
-  
           target,
-  
           qubitCount: 3,
-  
           re: this.stateRe,
-  
           im: this.stateIm
-  
         });
       });
     },
@@ -1373,23 +1348,15 @@ const Home = {
     applyGate(gate, targetQubit) {
       return new Promise((resolve) => {
         const id = this.requestId++;
-    
         this.pending.set(id, resolve);
-  
         this.worker.postMessage({
-  
+          id,
           type: 'gate',
-  
           gate,
-  
           targetQubit,
-  
           qubitCount: 3,
-  
           re: this.stateRe,
-  
           im: this.stateIm
-  
         });
       });
     },
@@ -1397,15 +1364,10 @@ const Home = {
     measure() {
 
       this.worker.postMessage({
-
         type: 'measure',
-
         qubitCount: 3,
-
         re: this.stateRe,
-
         im: this.stateIm
-
       });
     },
 
