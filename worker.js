@@ -311,7 +311,6 @@ self.onmessage = (e) => {
   if (type === 'gate') {
 
     const result = applySingleQubitGate(
-      id,
       re,
       im,
       gates[gate],
@@ -319,7 +318,12 @@ self.onmessage = (e) => {
       qubitCount
     );
 
-    self.postMessage(result, [
+    self.postMessage({
+      id,
+      re: result.re,
+      im: result.im,
+      measured: result.measured
+    }, [
       result.re.buffer,
       result.im.buffer
     ]);
@@ -328,7 +332,6 @@ self.onmessage = (e) => {
   if (type === 'cnot') {
 
     const result = applyCNOT(
-      id,
       re,
       im,
       control,
@@ -336,7 +339,12 @@ self.onmessage = (e) => {
       qubitCount
     );
 
-    self.postMessage(result, [
+    self.postMessage({
+      id,
+      re: result.re,
+      im: result.im,
+      measured: result.measured
+    }, [
       result.re.buffer,
       result.im.buffer
     ]);
