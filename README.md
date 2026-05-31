@@ -1,53 +1,60 @@
-# 3 Qubits Quantum Simulator
+# 3-Qubit Quantum Simulator
 
-A minimal client-side quantum computer simulator built with modern browser technologies.
+An educational quantum computer simulator that runs entirely inside the browser.
 
-The application demonstrates the fundamental behavior of a 3-qubit quantum computer directly inside the browser without requiring any backend server.
+The application demonstrates the behavior of a 3-qubit quantum system using modern web technologies without requiring any backend server.
 
-The simulator supports:
+Users can explore quantum gates, superposition, phase, entanglement, density matrices, Bloch spheres, and measurement collapse through interactive visualizations.
 
-- Single-qubit gates
-- Two-qubit operations
-- Bell state generation
-- Quantum entanglement
-- Quantum measurement
-- Probability visualization
-
-The application is fully client-side and deployable on GitHub Pages.
+The simulator is fully client-side and deployable on GitHub Pages.
 
 ---
 
 ## Live Demo
 
-- Demo: https://bowo-prasetyo.github.io/quantum-2qubits/
+- Demo: https://bowo-prasetyo.github.io/quantum-3qubits/
 - Repository: https://github.com/bowo-prasetyo/quantum-3qubits/
-  
+
 ---
 
 ## Features
 
+### Quantum Simulation
+
+- 3-qubit quantum state simulation
+- Complex-valued quantum amplitudes
+- Single-qubit gates
+- Controlled-NOT (CNOT) operations
+- Bell state generation
+- GHZ state generation
+- Quantum superposition
+- Quantum phase manipulation
+- Quantum entanglement
+- Quantum measurement
+- Measurement collapse
+- State normalization
+
+### Visualization
+
+- Quantum state display
+- Probability distribution chart
+- Density matrix visualization
+- Reduced density matrix computation
+- Bloch sphere visualization
+- Entanglement graph visualization
+- WebGL accelerated visualization
+
+### Application Features
+
 - Vue 3 CDN architecture
 - Vue Router multi-page navigation
 - Web Worker quantum computation
-- HTML Canvas visualization
 - IndexedDB persistence
+- Client-side architecture
 - GitHub Pages compatible
-- Client-only application
 - Educational user manual
-- Beginner-friendly quantum explanations
-- Quantum state persistence across browser refreshes
-- Real-time probability visualization
-- Single-qubit quantum gates
-- Two-qubit quantum states
-- Bell state generation
-- CNOT gate
-- Entanglement demonstrations
-- Measurement collapse simulation
-- Probability bars for:
-  - |00⟩
-  - |01⟩
-  - |10⟩
-  - |11⟩
+- Quantum concepts reference
+- Automatic state restoration
 
 ---
 
@@ -56,95 +63,206 @@ The application is fully client-side and deployable on GitHub Pages.
 ### Single-Qubit Gates
 
 | Gate | Name | Description |
-|---|---|---|
-| I | Identity Gate | Leaves the selected qubit unchanged |
-| H | Hadamard Gate | Creates quantum superposition |
+|------|------|-------------|
+| I | Identity Gate | Leaves the qubit unchanged |
+| H | Hadamard Gate | Creates superposition |
 | X | Pauli-X Gate | Quantum NOT gate |
-| Y | Pauli-Y Gate | Quantum rotation using imaginary phase |
-| Z | Pauli-Z Gate | Quantum phase flip |
-| S | Phase Gate | 90° quantum phase rotation |
-| T | π/8 Gate | 45° quantum phase rotation |
+| Y | Pauli-Y Gate | Bit flip with phase rotation |
+| Z | Pauli-Z Gate | Phase flip |
+| S | Phase Gate | 90° phase rotation |
+| T | π/8 Gate | 45° phase rotation |
 
-### Two-Qubit Gates
+### Multi-Qubit Gates
 
 | Gate | Name | Description |
-|---|---|---|
+|------|------|-------------|
 | CNOT | Controlled-NOT Gate | Conditionally flips the target qubit |
 
 ---
 
 ## Quantum State Representation
 
-The simulator represents a 2-qubit quantum system as:
+The simulator represents a 3-qubit quantum system as:
 
 ```text
-|ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩
+|ψ⟩ =
+α|000⟩ + β|001⟩ + γ|010⟩ + δ|011⟩ +
+ε|100⟩ + ζ|101⟩ + η|110⟩ + θ|111⟩
 ```
 
 Where:
 
-- α, β, γ, and δ are complex probability amplitudes
-- The total probability must equal 1
+- α through θ are complex probability amplitudes
+- The system may occupy all basis states simultaneously
+- The total probability always equals 1
 
 Normalization rule:
 
 ```text
-|α|² + |β|² + |γ|² + |δ|² = 1
+|α|² + |β|² + |γ|² + |δ|² +
+|ε|² + |ζ|² + |η|² + |θ|² = 1
+```
+
+---
+
+## Basis States
+
+A 3-qubit system contains eight computational basis states:
+
+```text
+|000⟩
+|001⟩
+|010⟩
+|011⟩
+|100⟩
+|101⟩
+|110⟩
+|111⟩
 ```
 
 ---
 
 ## Probability Visualization
 
-The simulator visualizes measurement probabilities using probability bars.
+The simulator displays measurement probabilities for all basis states.
 
-The bars represent:
+The probability chart shows:
 
-- |00⟩
-- |01⟩
-- |10⟩
-- |11⟩
+```text
+|000⟩
+|001⟩
+|010⟩
+|011⟩
+|100⟩
+|101⟩
+|110⟩
+|111⟩
+```
 
-Taller bars indicate higher probability of measurement.
+Taller bars indicate higher measurement probability.
 
-This visualization helps users understand:
+This helps visualize:
 
 - Superposition
-- Probability amplitudes
-- Entanglement behavior
-- Quantum gate effects
+- Quantum interference
+- Entanglement
+- Gate effects
 - Measurement collapse
 
 ---
 
-## Bell States And Entanglement
+## Bell States
 
 The simulator can generate Bell states such as:
 
 ```text
-(|00⟩ + |11⟩) / √2
+(|000⟩ + |110⟩) / √2
+```
+
+using:
+
+1. Hadamard gate on Qubit 0
+2. CNOT gate
+
+Bell states demonstrate two-qubit entanglement.
+
+Typical measurements become:
+
+```text
+|000⟩
+|110⟩
+```
+
+while other basis states rarely appear.
+
+---
+
+## GHZ States
+
+The simulator can generate a three-qubit GHZ state:
+
+```text
+(|000⟩ + |111⟩) / √2
 ```
 
 using:
 
 1. Hadamard gate
 2. CNOT gate
+3. CNOT gate
 
-This creates quantum entanglement.
+The GHZ state entangles all three qubits simultaneously.
 
-Entangled qubits behave as a connected quantum system where measurements become correlated.
+Typical measurements become:
 
-Typical Bell-state measurements become:
+```text
+|000⟩
+|111⟩
+```
 
-- |00⟩
-- |11⟩
+---
 
-while:
+## Density Matrix Support
 
-- |01⟩
-- |10⟩
+The simulator computes the complete density matrix of the quantum system.
 
-rarely appear.
+The density matrix provides:
+
+- Probability information
+- Phase relationships
+- Quantum coherence
+- Entanglement information
+
+Both pure-state and mixed-state representations can be expressed using density matrices.
+
+---
+
+## Reduced Density Matrices
+
+For each qubit, a reduced density matrix is computed by tracing out the remaining qubits.
+
+This allows the simulator to display the local state of each individual qubit even when the system is entangled.
+
+---
+
+## Bloch Sphere Visualization
+
+Each qubit is visualized on a Bloch sphere.
+
+The Bloch vector indicates:
+
+- State orientation
+- Degree of purity
+- Superposition
+- Entanglement effects
+
+Pure states lie on the sphere surface, while mixed or entangled states move toward the center.
+
+---
+
+## Entanglement Graph
+
+The simulator visualizes quantum correlations between qubits.
+
+The graph helps illustrate:
+
+- Pairwise entanglement
+- Correlation strength
+- Multi-qubit interactions
+
+Stronger connections indicate stronger quantum correlations.
+
+---
+
+## WebGL Visualization
+
+GPU-accelerated WebGL rendering is used for advanced visualizations.
+
+Benefits include:
+
+- Smoother rendering
+- Better scalability
+- Future support for larger simulations
 
 ---
 
@@ -152,21 +270,22 @@ rarely appear.
 
 The simulator demonstrates:
 
-- Qubit state representation
-- Two-qubit systems
+- Qubits
 - Superposition
+- Quantum amplitudes
+- Complex numbers
 - Quantum phase
-- Quantum measurement
-- Wavefunction collapse
-- Reversible quantum operations
-- Complex-number amplitudes
-- Probability amplitudes
-- Quantum gate transformations
-- Bell states
+- Interference
 - Entanglement
-- Controlled quantum operations
-- Conditional logic
+- Bell states
+- GHZ states
+- Density matrices
+- Reduced density matrices
+- Bloch spheres
+- Controlled operations
+- Measurement collapse
 - Probability distributions
+- Reversible computation
 
 ---
 
@@ -177,25 +296,26 @@ The simulator demonstrates:
 - HTML5
 - CSS3
 - JavaScript ES Modules
-- [Vue.js](https://vuejs.org/)
-- [Vue Router](https://router.vuejs.org/)
-  
+- Vue 3
+- Vue Router
+
 ### Browser APIs
 
 - Web Workers
 - HTML Canvas
+- WebGL
 - IndexedDB
 
 ### Deployment
 
-- [GitHub Pages](https://pages.github.com/)
-  
+- GitHub Pages
+
 ---
 
 ## Project Structure
 
 ```text
-quantum-2qubits/
+quantum-3qubits/
 ├── index.html
 ├── app.js
 ├── router.js
@@ -207,40 +327,6 @@ quantum-2qubits/
 
 ---
 
-## Run Locally
-
-Use any static web server.
-
-Example using Python:
-
-```bash
-python -m http.server 8080
-```
-
-Then open:
-
-```text
-http://localhost:8080
-```
-
----
-
-## Deploy To GitHub Pages
-
-1. Create a GitHub repository
-2. Upload all project files
-3. Commit and push to GitHub
-4. Open repository settings
-5. Go to Pages
-6. Select:
-   - Branch: `main`
-   - Folder: `/root`
-7. Save settings
-
-GitHub Pages will automatically deploy the application.
-
----
-
 ## Architecture
 
 ### Main Thread
@@ -248,9 +334,11 @@ GitHub Pages will automatically deploy the application.
 Responsible for:
 
 - Vue UI rendering
-- Canvas visualization
-- Probability rendering
-- Router navigation
+- Probability charts
+- Density matrix rendering
+- Bloch sphere rendering
+- Entanglement graph rendering
+- WebGL visualization
 - IndexedDB persistence
 - User interaction
 
@@ -258,21 +346,25 @@ Responsible for:
 
 Responsible for:
 
-- Quantum gate computation
+- Quantum gate operations
+- State-vector evolution
 - Matrix-vector multiplication
-- CNOT operations
-- Quantum measurement
-- State collapse
+- CNOT computation
+- Bell state generation
+- GHZ state generation
+- Density matrix computation
+- Reduced density matrix computation
+- Measurement and collapse
 
-This separation keeps the UI responsive while performing quantum calculations.
+This separation keeps the user interface responsive while quantum calculations run in the background.
 
 ---
 
 ## Persistence
 
-The simulator automatically saves the latest quantum state using IndexedDB.
+The simulator automatically stores the latest quantum state using IndexedDB.
 
-Refreshing the browser restores the previous quantum state automatically.
+After refreshing the browser, the previous state is restored automatically.
 
 ---
 
@@ -282,14 +374,16 @@ The included User Manual demonstrates:
 
 1. Classical bit flipping
 2. Quantum superposition
-3. Quantum collapse
-4. Double Hadamard reversibility
+3. Measurement collapse
+4. Reversible computation
 5. Quantum phase manipulation
 6. Bell state creation
-7. Controlled operations using CNOT
+7. Controlled operations
 8. Probability visualization
-9. Entanglement behavior
-10. Measurement correlation
+9. GHZ state creation
+10. Bloch sphere analysis
+11. Density matrix visualization
+12. Entanglement visualization
 
 ---
 
@@ -297,20 +391,18 @@ The included User Manual demonstrates:
 
 Possible future enhancements:
 
-- Animated gate transitions
-- Interactive 3D visualization
-- Full WebGL quantum renderer
-- 3-qubit simulation
-- Entanglement graph visualization
 - Quantum circuit editor
 - Drag-and-drop gates
+- Animated gate transitions
 - Quantum Fourier Transform
+- Grover's algorithm
+- Shor's algorithm demonstrations
 - WebGPU acceleration
 - WASM math backend
-- OPFS binary snapshots
-- Noise and decoherence simulation
-- Density matrix visualization
-- Quantum algorithm playground
+- Noise simulation
+- Decoherence simulation
+- Quantum error correction examples
+- Larger qubit systems
 
 ---
 
@@ -322,4 +414,4 @@ MIT License
 
 ## Assisted By
 
-[ChatGPT](https://chatgpt.com)
+[ChatGPT](https://chatgpt.com/)
