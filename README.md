@@ -41,7 +41,7 @@ The simulator is fully client-side and deployable on GitHub Pages.
 - Density matrix visualization
 - Reduced density matrix computation
 - Bloch sphere visualization
-- Entanglement graph visualization
+- Correlation graph of measured-bit agreement between qubit pairs
 - 3D WebGL basis-state visualization
 
 ### Application Features
@@ -77,7 +77,10 @@ The simulator is fully client-side and deployable on GitHub Pages.
 
 | Gate | Name | Description |
 |------|------|-------------|
-| CNOT | Controlled-NOT Gate | Conditionally flips the target qubit |
+| CNOT | Controlled-NOT Gate | Flips the target qubit when the control qubit is \|1⟩ |
+
+The **CNOT** button always uses qubit 0 as control and qubit 1 as target.
+In the Circuit Editor, a CNOT step uses the selected qubit as control and the next qubit as target (q0→q1, q1→q2, q2→q0).
 
 ---
 
@@ -160,14 +163,16 @@ The simulator can generate Bell states such as:
 (|000⟩ + |110⟩) / √2
 ```
 
-using:
+starting from |000⟩ (press **Reset** first), using:
 
-1. Hadamard gate on Qubit 0
-2. CNOT gate
+1. Hadamard gate on qubit 0
+2. CNOT gate (control qubit 0, target qubit 1)
+
+The **Create Bell Pair** button runs both steps. It does not reset first.
 
 Bell states demonstrate two-qubit entanglement.
 
-Typical measurements become:
+Measurements always give one of:
 
 ```text
 |000⟩
@@ -186,15 +191,17 @@ The simulator can generate a three-qubit GHZ state:
 (|000⟩ + |111⟩) / √2
 ```
 
-using:
+starting from |000⟩ (press **Reset** first), using:
 
-1. Hadamard gate
-2. CNOT gate
-3. CNOT gate
+1. Hadamard gate on qubit 0
+2. CNOT gate (control qubit 0, target qubit 1)
+3. CNOT gate (control qubit 1, target qubit 2)
+
+The **GHZ State** button runs all three steps. It does not reset first.
 
 The GHZ state entangles all three qubits simultaneously.
 
-Typical measurements become:
+Measurements always give one of:
 
 ```text
 |000⟩
@@ -216,7 +223,8 @@ The density matrix provides:
 - Quantum coherence
 - Entanglement information
 
-Both pure-state and mixed-state representations can be expressed using density matrices.
+The full 3-qubit state in this simulator is always pure, so its density matrix is ρ = |ψ⟩⟨ψ|.
+Mixed states appear only in the reduced single-qubit states described below.
 
 ---
 
@@ -239,21 +247,28 @@ The Bloch vector indicates:
 - Superposition
 - Entanglement effects
 
-Pure states lie on the sphere surface, while mixed or entangled states move toward the center.
+Pure states lie on the sphere surface, while mixed states lie inside it.
+
+Because the full 3-qubit state is always pure here, a qubit whose Bloch vector is shorter than 1 is entangled with the other qubits.
+This makes the Bloch spheres the simulator's indicator of entanglement.
+For example, after **Create Bell Pair** the vectors of qubits 0 and 1 shrink to the centre, while qubit 2 stays at |0⟩.
 
 ---
 
-## Entanglement Graph
+## Correlation Graph
 
-The simulator visualizes quantum correlations between qubits.
+The correlation graph shows, for each pair of qubits, how reliably their measured bits agree or disagree.
 
-The graph helps illustrate:
+Each edge shows |⟨ZᵢZⱼ⟩|, computed from the probabilities of the eight basis states:
 
-- Pairwise entanglement
-- Correlation strength
-- Multi-qubit interactions
+- **1.00**: the two bits are always equal, or always opposite
+- **0.00**: knowing one bit tells you nothing about the other
 
-Stronger connections indicate stronger quantum correlations.
+The graph measures correlation in the computational (0/1) basis only. **It is not a measure of entanglement.**
+For example, after **Reset** the state |000⟩ shows 1.00 on every edge, because every bit is always 0, yet nothing is entangled.
+After **Create Bell Pair**, the Q0–Q1 edge stays at 1.00 while the edges to Q2 drop to 0.00.
+
+To see entanglement, use the Bloch spheres.
 
 ---
 
@@ -361,8 +376,12 @@ Responsible for:
 - Probability charts
 - Density matrix rendering
 - Bloch sphere rendering
-- Entanglement graph rendering
+- Correlation graph rendering
 - WebGL visualization
+- Density matrix computation
+- Reduced density matrix and Bloch vector computation
+- Correlation computation
+- Running Bell, GHZ and circuit sequences, one worker step at a time
 - IndexedDB persistence
 - User interaction
 
@@ -370,25 +389,20 @@ Responsible for:
 
 Responsible for:
 
-- Quantum gate operations
-- State-vector evolution
-- Matrix-vector multiplication
+- Single-qubit gate operations on the state vector
 - CNOT computation
-- Bell state generation
-- GHZ state generation
-- Density matrix computation
-- Reduced density matrix computation
 - Measurement and collapse
 
-This separation keeps the user interface responsive while quantum calculations run in the background.
+The main thread sends the current state with each request and receives the new state back.
+Gates and measurements run in the background, and the main thread computes what is displayed from the returned state.
 
 ---
 
 ## Persistence
 
-The simulator automatically stores the latest quantum state using IndexedDB.
+The simulator automatically stores the latest quantum state and the Circuit Editor's steps using IndexedDB.
 
-After refreshing the browser, the previous state is restored automatically.
+After refreshing the browser, both are restored automatically.
 
 ---
 
@@ -396,18 +410,24 @@ After refreshing the browser, the previous state is restored automatically.
 
 The included User Manual demonstrates:
 
-1. Classical bit flipping
+1. Classical bit flip
 2. Quantum superposition
-3. Measurement collapse
-4. Reversible computation
-5. Quantum phase manipulation
+3. Quantum measurement collapse
+4. Double Hadamard reversibility
+5. Quantum phase rotation
 6. Bell state creation
 7. Controlled operations
 8. Probability visualization
 9. GHZ state creation
 10. Bloch sphere analysis
 11. Density matrix visualization
-12. Entanglement visualization
+12. Correlation graph analysis
+13. Entanglement and mixed states
+14. WebGL quantum state visualization
+15. Quantum phase visualization
+16. 3D camera exploration
+17. Circuit editor
+18. Session persistence
 
 ---
 

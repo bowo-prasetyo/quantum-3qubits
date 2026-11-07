@@ -434,10 +434,12 @@ const Home = {
 
         <p>
           <strong>Correlation Graph</strong><br>
-          The correlation graph visualizes measurement correlations between qubits.
-          Stronger connections indicate that pairs of qubits tend to produce related
-          measurement outcomes. Correlation often appears in entangled states but is
-          not itself a direct measurement of entanglement.
+          For each pair of qubits, the graph shows how reliably their measured bits
+          agree or disagree: 1.00 means always equal or always opposite, and 0.00
+          means one bit tells you nothing about the other.
+          It is not a measure of entanglement. After Reset, |000⟩ shows 1.00 on
+          every edge although nothing is entangled. Use the Bloch spheres to see
+          entanglement.
         </p>
 
         <p>
@@ -482,9 +484,9 @@ const Home = {
         
         <p>
           <strong>Correlation Strength</strong><br>
-          The correlation graph displays a simple estimate of how strongly pairs
-          of qubits are related. Larger values indicate stronger relationships
-          between measurement outcomes.
+          Each edge shows |⟨ZᵢZⱼ⟩|, the agreement between two qubits' measured bits
+          in the 0/1 basis, worked out from the eight basis-state probabilities.
+          It ranges from 0.00 (unrelated) to 1.00 (always equal or always opposite).
         </p>
         
         <p>
@@ -538,9 +540,10 @@ const Home = {
         
         <p>
           <strong>Web Worker</strong><br>
-          Quantum calculations are performed inside a background worker thread.
-          This keeps the user interface responsive while quantum operations are
-          being executed.
+          Gate operations and measurements are performed inside a background
+          worker thread, which keeps the user interface responsive. The displays,
+          such as the density matrix and Bloch spheres, are computed on the page
+          from the state the worker returns.
         </p>
         
         <p>
@@ -2281,22 +2284,33 @@ const Manual = {
         <p><strong>Objective:</strong></p>
       
         <p>
-          Observe how relationships between qubits change after entangling operations.
+          Learn what the correlation graph measures, and why it is not the same as entanglement.
         </p>
       
         <p><strong>Steps:</strong></p>
       
         <ol>
-          <li>Press Reset</li>
-          <li>Create a Bell State</li>
-          <li>Observe the Correlation Graph</li>
+          <li>Press Reset and observe the Correlation Graph</li>
+          <li>Press Create Bell Pair</li>
+          <li>Observe the Correlation Graph again</li>
         </ol>
       
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          A strong connection appears between qubit 0 and qubit 1.
-          This indicates that their measurement outcomes are highly correlated.
+          After Reset, all three edges read 1.00: every qubit is 0, so every pair
+          always agrees, even though nothing is entangled.
+        </p>
+
+        <p>
+          After Create Bell Pair, the Q0–Q1 edge stays at 1.00 while the edges to
+          Q2 drop to 0.00. Qubits 0 and 1 are now random but always match, and
+          qubit 2 is unrelated to them.
+        </p>
+
+        <p>
+          The graph shows agreement between measured bits, not entanglement.
+          To see entanglement, use the Bloch spheres (Use Case 13).
         </p>
       
       </div>
@@ -2320,20 +2334,22 @@ const Manual = {
       
         <ol>
           <li>Press Reset</li>
-          <li>Create a Bell State</li>
+          <li>Press Create Bell Pair</li>
           <li>Observe the Bloch spheres</li>
         </ol>
       
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          The Bloch vectors of the entangled qubits move toward the center
-          of their spheres.
+          The Bloch vectors of qubits 0 and 1 shrink to the centre of their
+          spheres, while qubit 2 stays at |0⟩ on the north pole.
         </p>
       
         <p>
-          This indicates that each qubit individually behaves like a mixed state,
-          even though the overall two-qubit system remains perfectly defined.
+          This indicates that qubits 0 and 1 each behave like a mixed state on
+          their own, even though the overall three-qubit state is perfectly
+          defined (a pure state). Because the full state is pure, a Bloch vector
+          shorter than 1 always means that qubit is entangled with the others.
         </p>
       
       </div>
