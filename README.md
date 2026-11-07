@@ -52,7 +52,7 @@ The simulator is fully client-side and deployable on GitHub Pages.
 - IndexedDB persistence
 - Client-side architecture
 - GitHub Pages compatible
-- Drag-and-drop quantum circuit editor
+- Quantum circuit editor (tap or drag gates; works with mouse, touch and keyboard)
 - Educational user manual
 - Quantum concepts reference
 - Automatic state restoration
@@ -278,7 +278,7 @@ The WebGL view places the eight basis states at the corners of a 3D cube.
 
 - Point size shows each state's probability
 - Colour shows the phase of its amplitude, using the same colours as the density matrix
-- Drag to rotate the cube and use the mouse wheel to zoom
+- Drag with the mouse or one finger to rotate the cube; use the mouse wheel or a two-finger pinch to zoom
 
 ---
 
