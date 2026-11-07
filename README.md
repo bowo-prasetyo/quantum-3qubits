@@ -431,6 +431,17 @@ The included User Manual demonstrates:
 
 ---
 
+## Product Direction
+
+The plan is to merge the 1-, 2- and 3-qubit simulators into one guided Quantum Lab. See:
+
+- [Product vision](docs/VISION.md)
+- [Merge plan](docs/MERGE_PLAN.md)
+
+Both are proposals for review.
+
+---
+
 ## Future Improvements
 
 Possible future enhancements:
