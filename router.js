@@ -1,11 +1,34 @@
 
-const adapter =
-  await navigator.gpu?.requestAdapter();
-
-const supported = !!adapter;
-if (supported) {
-  console.log('WebGPU supported');
+// Phase → colour, shared by the density matrix and the WebGL view so the
+// same colour always means the same phase. Phase 0 is red, π/2 yellow-green,
+// ±π cyan, −π/2 violet (hue = phase in degrees).
+function phaseToRgb(phase) {
+  const hue = ((phase * 180 / Math.PI) % 360 + 360) % 360;
+  const s = 0.85;
+  const l = 0.55;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const hp = hue / 60;
+  const x = c * (1 - Math.abs((hp % 2) - 1));
+  const [r1, g1, b1] =
+    hp < 1 ? [c, x, 0] :
+    hp < 2 ? [x, c, 0] :
+    hp < 3 ? [0, c, x] :
+    hp < 4 ? [0, x, c] :
+    hp < 5 ? [x, 0, c] :
+             [c, 0, x];
+  const m = l - c / 2;
+  return [r1 + m, g1 + m, b1 + m];
 }
+
+function phaseToCss(phase) {
+  const [r, g, b] = phaseToRgb(phase).map(v => Math.round(v * 255));
+  return `rgb(${r},${g},${b})`;
+}
+
+const BASIS_LABELS = [
+  '|000⟩', '|001⟩', '|010⟩', '|011⟩',
+  '|100⟩', '|101⟩', '|110⟩', '|111⟩'
+];
 
 function mat4Perspective(fov, aspect, near, far) {
   const f = 1.0 / Math.tan(fov / 2);
@@ -91,10 +114,8 @@ const Home = {
       
         <p>Hilbert Space Size: 8</p>
       
-        <p>WebGL: Enabled</p>
-      
-        <p>WebGPU:
-          {{ webgpuSupported ? 'Supported' : 'Not Supported' }}
+        <p>3D view (WebGL):
+          {{ webglSupported ? 'Available' : 'Not available in this browser' }}
         </p>
       </div>
 
@@ -110,32 +131,41 @@ const Home = {
       
       </div>
 
-      <div class="bloch-row">
-      
-        <div>
-          <p>Qubit 0</p>
-          <canvas ref="bloch0"></canvas>
+      <div class="card">
+        <h2>Bloch Spheres</h2>
+
+        <div class="bloch-row">
+          <div>
+            <p>Qubit 0</p>
+            <canvas ref="bloch0" width="260" height="260"></canvas>
+          </div>
+
+          <div>
+            <p>Qubit 1</p>
+            <canvas ref="bloch1" width="260" height="260"></canvas>
+          </div>
+
+          <div>
+            <p>Qubit 2</p>
+            <canvas ref="bloch2" width="260" height="260"></canvas>
+          </div>
         </div>
-      
-        <div>
-          <p>Qubit 1</p>
-          <canvas ref="bloch1"></canvas>
-        </div>
-      
-        <div>
-          <p>Qubit 2</p>
-          <canvas ref="bloch2"></canvas>
-        </div>
-      
       </div>
 
       <div class="card">
         <h2>Density Matrix</h2>
         <canvas
           ref="densityCanvas"
-          width="520"
-          height="520"
+          width="640"
+          height="560"
         ></canvas>
+        <p class="caption">
+          Row i, column j shows ρ<sub>ij</sub>.
+          A square's area shows its size |ρ<sub>ij</sub>| compared with the
+          largest entry ({{ densityMax.toFixed(3) }}), and its colour shows
+          the phase (same colours as the WebGL view).
+          The diagonal holds the measurement probabilities.
+        </p>
       </div>
       
       <div class="card">
@@ -252,7 +282,7 @@ const Home = {
           @click="removeStep(index)"
           title="Click to remove"
         >
-          {{ step.gate }}
+          {{ stepLabel(step) }}
         </div>
       
         </div>
@@ -412,8 +442,9 @@ const Home = {
 
         <p>
           <strong>WebGL Visualization</strong><br>
-          The WebGL view uses GPU acceleration to render quantum-state visualizations more efficiently.
-          This enables smoother animation and larger future simulations.
+          The WebGL view draws the eight basis states as points on a 3D cube,
+          using the browser's WebGL graphics interface.
+          Point size shows probability and colour shows phase.
         </p>
       
         <p>
@@ -506,13 +537,6 @@ const Home = {
         </p>
         
         <p>
-          <strong>GPU Acceleration</strong><br>
-          Modern graphics processors (GPUs) can render large numbers of visual
-          elements efficiently. The simulator uses WebGL and can detect WebGPU
-          support for future high-performance quantum visualizations.
-        </p>
-        
-        <p>
           <strong>Web Worker</strong><br>
           Quantum calculations are performed inside a background worker thread.
           This keeps the user interface responsive while quantum operations are
@@ -565,7 +589,8 @@ const Home = {
       },
       selectedQubit: 0,
       draggingGate: null,
-      webgpuSupported: 'gpu' in navigator,
+      webglSupported: true,
+      densityMax: 1,
       stateRe: new Float64Array([
         1, 0, 0, 0, 0, 0, 0, 0
       ]),
@@ -655,7 +680,8 @@ const Home = {
     canvas.addEventListener('mousedown', this.onMouseDown);
     window.addEventListener('mouseup', this.onMouseUp);
     window.addEventListener('mousemove', this.onMouseMove);
-    canvas.addEventListener('wheel', this.onWheel);
+    // passive: false lets onWheel stop the page from scrolling while zooming
+    canvas.addEventListener('wheel', this.onWheel, { passive: false });
         
     this.renderWebGL();
     this.worker = new Worker('./worker.js');
@@ -711,12 +737,13 @@ const Home = {
         this.stateRe = saved.stateRe;
         this.stateIm = saved.stateIm;
         this.circuit = saved.circuit;
-    
-        this.redrawAll();
       }
     } catch (e) {
       console.warn("Failed to load state:", e);
-    }        
+    }
+
+    // Draw every view now, including on a first visit with no saved state.
+    this.redrawAll();
   },
 
   methods: {
@@ -746,8 +773,19 @@ const Home = {
     },
     
     onWheel(e) {
+      e.preventDefault();
+
       this.camera.distance += e.deltaY * 0.01;
       this.camera.distance = Math.max(2, Math.min(10, this.camera.distance));
+
+      this.renderWebGL();
+    },
+
+    // e.g. 'H q0' or 'CNOT q0→q1'
+    stepLabel(step) {
+      return step.gate === 'CNOT'
+        ? `CNOT q${step.control}→q${step.target}`
+        : `${step.gate} q${step.target}`;
     },
         
     removeStep(index) {
@@ -1207,6 +1245,7 @@ const Home = {
 
       if (!this.gl) {
         console.error('WebGL unsupported');
+        this.webglSupported = false;
         return;
       }
       
@@ -1358,9 +1397,7 @@ const Home = {
         // phase → color encoding
         const phase = Math.atan2(im, re);
     
-        const r = 0.5 + 0.5 * Math.cos(phase);
-        const g = 0.5 + 0.5 * Math.cos(phase + 2.0);
-        const b = 0.5 + 0.5 * Math.cos(phase + 4.0);
+        const [r, g, b] = phaseToRgb(phase);
     
         // basis index → cube position
         const bit0 = (i >> 2) & 1;
@@ -1408,74 +1445,122 @@ const Home = {
     },
     
     drawDensityMatrix() {
-
       const canvas = this.$refs.densityCanvas;
       const ctx = canvas.getContext('2d');
-            
+
       const size = 8;
+      const left = 64;   // room for row labels
+      const top = 48;    // room for column labels
+      const cell = 60;
+      const grid = size * cell;
 
-      const cell =
-        Math.min(
-          canvas.width,
-          canvas.height
-        ) / size;
-
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#000';
-      ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // ρ = |ψ⟩⟨ψ|, so ρij = ψi · conj(ψj)
+      const entries = [];
+      let max = 0;
 
       for (let i = 0; i < size; i++) {
-
         for (let j = 0; j < size; j++) {
-
-          const ar = this.stateRe[i];
-          const ai = this.stateIm[i];
-
-          const br = this.stateRe[j];
-          const bi = -this.stateIm[j];
-
           const re =
-            ar * br -
-            ai * bi;
-
+            this.stateRe[i] * this.stateRe[j] +
+            this.stateIm[i] * this.stateIm[j];
           const im =
-            ar * bi +
-            ai * br;
+            this.stateIm[i] * this.stateRe[j] -
+            this.stateRe[i] * this.stateIm[j];
+          const magnitude = Math.sqrt(re * re + im * im);
 
-          const magnitude =
-            Math.sqrt(
-              re * re +
-              im * im
-            );
-
-          const phase =
-            Math.atan2(im, re);
-
-          const hue =
-            ((phase / (2 * Math.PI)) + 1) * 180;
-
-          ctx.fillStyle =
-            `hsl(${hue},100%,${magnitude*50}%)`;
-
-          ctx.fillRect(
-            j * cell,
-            i * cell,
-            cell,
-            cell
-          );
+          entries.push({ i, j, magnitude, phase: Math.atan2(im, re) });
+          max = Math.max(max, magnitude);
         }
       }
+
+      this.densityMax = max;
+
+      // Grid: diagonal cells slightly lighter so the probabilities stand out
+      for (let k = 0; k < size; k++) {
+        for (let m = 0; m < size; m++) {
+          ctx.fillStyle = k === m ? '#1c1c1c' : '#111';
+          ctx.fillRect(left + m * cell, top + k * cell, cell, cell);
+        }
+      }
+
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      for (let k = 0; k <= size; k++) {
+        ctx.beginPath();
+        ctx.moveTo(left + k * cell, top);
+        ctx.lineTo(left + k * cell, top + grid);
+        ctx.moveTo(left, top + k * cell);
+        ctx.lineTo(left + grid, top + k * cell);
+        ctx.stroke();
+      }
+
+      // Entries: area ∝ |ρij| / largest entry, colour = phase
+      for (const { i, j, magnitude, phase } of entries) {
+        if (max === 0 || magnitude < 1e-9) continue;
+
+        const side = (cell - 6) * Math.sqrt(magnitude / max);
+        const x = left + j * cell + (cell - side) / 2;
+        const y = top + i * cell + (cell - side) / 2;
+
+        ctx.fillStyle = phaseToCss(phase);
+        ctx.fillRect(x, y, side, side);
+      }
+
+      // Probabilities printed under each diagonal square
+      ctx.font = '11px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      for (let k = 0; k < size; k++) {
+        const p = entries[k * size + k].magnitude;
+        if (p < 0.0005) continue;
+        ctx.fillStyle = '#fff';
+        ctx.fillText(
+          p.toFixed(3),
+          left + k * cell + cell / 2,
+          top + k * cell + cell - 4
+        );
+      }
+
+      // Row and column labels
+      ctx.fillStyle = '#ccc';
+      ctx.font = '12px Arial';
+      for (let k = 0; k < size; k++) {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(BASIS_LABELS[k], left + k * cell + cell / 2, top - 8);
+
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(BASIS_LABELS[k], left - 8, top + k * cell + cell / 2);
+      }
+
+      // Phase legend: a colour bar from +π (top) to −π (bottom)
+      const barX = left + grid + 30;
+      const barW = 18;
+      for (let y = 0; y < grid; y++) {
+        const phase = Math.PI - (2 * Math.PI * y) / grid;
+        ctx.fillStyle = phaseToCss(phase);
+        ctx.fillRect(barX, top + y, barW, 1);
+      }
+
+      ctx.fillStyle = '#ccc';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('phase', barX + barW / 2, top - 8);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      [['π', 0], ['π/2', 0.25], ['0', 0.5], ['−π/2', 0.75], ['−π', 1]]
+        .forEach(([label, f]) => {
+          ctx.fillText(label, barX + barW + 6, top + f * grid);
+        });
+
+      ctx.textAlign = 'start';
+      ctx.textBaseline = 'alphabetic';
     },
 
     async runCircuit() {
@@ -1721,7 +1806,6 @@ const Manual = {
           <li>Interactive quantum circuit editor</li>
           <li>3D WebGL state visualization</li>
           <li>Quantum phase color visualization</li>
-          <li>GPU-accelerated rendering</li>
           <li>Automatic session persistence</li>
         </ul>
       </div>
@@ -2174,12 +2258,14 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          Bright diagonal entries indicate basis-state probabilities.
+          Squares on the diagonal show basis-state probabilities.
+          For a GHZ state, the |000⟩ and |111⟩ diagonal squares appear
+          together with two off-diagonal squares in the opposite corners.
         </p>
       
         <p>
-          Off-diagonal entries indicate quantum coherence
-          and interference effects.
+          Off-diagonal squares indicate quantum coherence:
+          the basis states are in superposition, not just a random mix.
         </p>
       
       </div>
@@ -2380,8 +2466,9 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          The circuit executes sequentially and produces the same result
-          as manually applying the gates one by one.
+          Each circuit step shows its gate and target qubit, such as
+          "H q0" or "CNOT q0→q1". The circuit executes sequentially and
+          produces the same result as manually applying the gates one by one.
         </p>
       
       </div>
