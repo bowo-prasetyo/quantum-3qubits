@@ -181,10 +181,14 @@ const Home = {
         <h2>WebGL Visualization</h2>
       
         <canvas
+          class="webgl-canvas"
           ref="webglCanvas"
           width="600"
           height="300"
         ></canvas>
+        <p class="caption">
+          Drag to rotate. Use the mouse wheel or pinch with two fingers to zoom.
+        </p>
       </div>
 
       <div class="card">
@@ -248,14 +252,25 @@ const Home = {
       
         <div class="gate-palette">
     
-          <div class="gate" draggable="true" @dragstart="startDrag('I')">I</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('H')">H</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('X')">X</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('Y')">Y</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('Z')">Z</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('S')">S</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('T')">T</div>
-          <div class="gate" draggable="true" @dragstart="startDrag('CNOT')">CNOT</div>
+          <!--
+            Three ways to add a gate: drag it with a mouse (native drag and
+            drop), drag it with a finger or pen (pointer events), or tap /
+            click / press Enter on it.
+          -->
+          <div
+            v-for="g in paletteGates"
+            :key="g"
+            class="gate"
+            role="button"
+            tabindex="0"
+            :aria-label="'Add ' + g + ' gate to the selected qubit'"
+            draggable="true"
+            @dragstart="startDrag(g)"
+            @pointerdown="onGatePointerDown($event, g)"
+            @click="onGateClick(g)"
+            @keydown.enter.prevent="addGate(g)"
+            @keydown.space.prevent="addGate(g)"
+          >{{ g }}</div>
 
         </div>
 
@@ -269,8 +284,15 @@ const Home = {
           <p>Current: Q{{ selectedQubit }}</p>
         </div>
         
+        <p class="caption">
+          Tap or drag a gate to add it to the selected qubit.
+          Tap a circuit step to remove it.
+        </p>
+
         <div
+          ref="dropzone"
           class="circuit-dropzone"
+          :class="{ 'drop-target': touchDrag && touchDrag.over }"
           @dragover.prevent
           @drop="dropGate"
         >
@@ -280,12 +302,19 @@ const Home = {
           :key="index"
           class="circuit-step"
           @click="removeStep(index)"
-          title="Click to remove"
+          title="Tap or click to remove"
         >
           {{ stepLabel(step) }}
         </div>
       
         </div>
+
+        <!-- Chip that follows the finger during a touch drag -->
+        <div
+          v-if="touchDrag && touchDrag.moved"
+          class="drag-ghost"
+          :style="{ left: touchDrag.x + 'px', top: touchDrag.y + 'px' }"
+        >{{ touchDrag.gate }}</div>
       
         <button @click="runCircuit">
           Run Circuit
@@ -472,7 +501,7 @@ const Home = {
           <strong>Circuit Step</strong><br>
           Each step in the circuit represents one quantum operation.
           Operations are executed in order from left to right.
-          Clicking a circuit step removes it from the circuit.
+          Tapping or clicking a circuit step removes it from the circuit.
         </p>
         
         <p>
@@ -534,8 +563,9 @@ const Home = {
         <p>
           <strong>3D Camera Controls</strong><br>
           The WebGL visualization supports interactive camera movement.
-          Dragging rotates the view while the mouse wheel zooms in and out,
-          allowing the quantum state to be examined from different angles.
+          Drag with the mouse or one finger to rotate the view. Use the mouse
+          wheel, or pinch with two fingers, to zoom in and out.
+          This lets you examine the quantum state from different angles.
         </p>
         
         <p>
@@ -585,13 +615,11 @@ const Home = {
         rotY: 0,
         distance: 4
       },
-      mouse: {
-        dragging: false,
-        lastX: 0,
-        lastY: 0
-      },
       selectedQubit: 0,
       draggingGate: null,
+      paletteGates: ['I', 'H', 'X', 'Y', 'Z', 'S', 'T', 'CNOT'],
+      // { gate, x, y, startX, startY, moved, over } during a touch/pen drag
+      touchDrag: null,
       webglSupported: true,
       densityMax: 1,
       stateRe: new Float64Array([
@@ -648,26 +676,14 @@ const Home = {
     const canvas = this.$refs.webglCanvas;
   
     if (canvas) {
-      canvas.removeEventListener(
-        'mousedown',
-        this.onMouseDown
-      );
-  
-      canvas.removeEventListener(
-        'wheel',
-        this.onWheel
-      );
+      canvas.removeEventListener('pointerdown', this.onPointerDown);
+      canvas.removeEventListener('pointermove', this.onPointerMove);
+      canvas.removeEventListener('pointerup', this.onPointerUp);
+      canvas.removeEventListener('pointercancel', this.onPointerUp);
+      canvas.removeEventListener('wheel', this.onWheel);
     }
-  
-    window.removeEventListener(
-      'mouseup',
-      this.onMouseUp
-    );
-  
-    window.removeEventListener(
-      'mousemove',
-      this.onMouseMove
-    );
+
+    this.stopGateDrag();
   
     if (this.worker)
       this.worker.terminate();
@@ -680,9 +696,16 @@ const Home = {
 
     const canvas = this.$refs.webglCanvas;
 
-    canvas.addEventListener('mousedown', this.onMouseDown);
-    window.addEventListener('mouseup', this.onMouseUp);
-    window.addEventListener('mousemove', this.onMouseMove);
+    // Pointer events cover mouse, touch and pen with one set of handlers.
+    // Active pointers on the 3D view: one rotates, two pinch-zoom.
+    this.pointers = new Map();
+    this.pinchDistance = null;
+    this.lastTouchDragEnd = 0;
+
+    canvas.addEventListener('pointerdown', this.onPointerDown);
+    canvas.addEventListener('pointermove', this.onPointerMove);
+    canvas.addEventListener('pointerup', this.onPointerUp);
+    canvas.addEventListener('pointercancel', this.onPointerUp);
     // passive: false lets onWheel stop the page from scrolling while zooming
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
         
@@ -750,36 +773,64 @@ const Home = {
   },
 
   methods: {
-    onMouseDown(e) {
-      this.mouse.dragging = true;
-      this.mouse.lastX = e.clientX;
-      this.mouse.lastY = e.clientY;
+    // ----- 3D view: rotate with one pointer, pinch-zoom with two -----
+
+    onPointerDown(e) {
+      // Keep receiving this pointer's events even if it leaves the canvas
+      e.currentTarget.setPointerCapture(e.pointerId);
+
+      this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      this.pinchDistance = this.pointerSpread();
     },
-    
-    onMouseUp() {
-      this.mouse.dragging = false;
-    },
-    
-    onMouseMove(e) {
-      if (!this.mouse.dragging) return;
-    
-      const dx = e.clientX - this.mouse.lastX;
-      const dy = e.clientY - this.mouse.lastY;
-    
-      this.mouse.lastX = e.clientX;
-      this.mouse.lastY = e.clientY;
-    
-      this.camera.rotY += dx * 0.01;
-      this.camera.rotX += dy * 0.01;
+
+    onPointerMove(e) {
+      const last = this.pointers.get(e.pointerId);
+      if (!last) return; // mouse moving without a button pressed
+
+      const current = { x: e.clientX, y: e.clientY };
+      this.pointers.set(e.pointerId, current);
+
+      if (this.pointers.size === 1) {
+        this.camera.rotY += (current.x - last.x) * 0.01;
+        this.camera.rotX += (current.y - last.y) * 0.01;
+      } else if (this.pointers.size === 2) {
+        const spread = this.pointerSpread();
+
+        if (this.pinchDistance && spread) {
+          // Fingers apart → closer camera (zoom in)
+          this.setCameraDistance(
+            this.camera.distance * (this.pinchDistance / spread)
+          );
+        }
+
+        this.pinchDistance = spread;
+      }
 
       this.renderWebGL();
+    },
+
+    onPointerUp(e) {
+      this.pointers.delete(e.pointerId);
+      this.pinchDistance = this.pointerSpread();
+    },
+
+    // Distance between the first two active pointers, or null
+    pointerSpread() {
+      if (this.pointers.size < 2) return null;
+
+      const [a, b] = [...this.pointers.values()];
+
+      return Math.hypot(a.x - b.x, a.y - b.y) || null;
+    },
+
+    setCameraDistance(distance) {
+      this.camera.distance = Math.max(2, Math.min(10, distance));
     },
     
     onWheel(e) {
       e.preventDefault();
 
-      this.camera.distance += e.deltaY * 0.01;
-      this.camera.distance = Math.max(2, Math.min(10, this.camera.distance));
+      this.setCameraDistance(this.camera.distance + e.deltaY * 0.01);
 
       this.renderWebGL();
     },
@@ -1593,36 +1644,111 @@ const Home = {
       }
     },
 
+    // ----- Circuit editor -----
+
+    // Adds a gate on the selected qubit. A CNOT uses the selected qubit
+    // as control and the next qubit as target.
+    addGate(gate) {
+      if (gate === 'CNOT') {
+        const control = this.selectedQubit;
+
+        this.circuit.push({
+          gate: 'CNOT',
+          control,
+          target: (control + 1) % 3
+        });
+      } else {
+        this.circuit.push({
+          gate,
+          target: this.selectedQubit
+        });
+      }
+    },
+
+    // Mouse: native HTML5 drag and drop
     startDrag(gate) {
       this.draggingGate = gate;
     },
 
     dropGate() {
-    
       if (!this.draggingGate) return;
-    
-      if (this.draggingGate === 'CNOT') {
-    
-        // default mapping using selected qubit as control
-        let control = this.selectedQubit;
-        let target = (control + 1) % 3;
-    
-        this.circuit.push({
-          gate: 'CNOT',
-          control,
-          target
-        });
-    
-      } else {
-    
-        this.circuit.push({
-          gate: this.draggingGate,
-          target: this.selectedQubit
-        });
-    
-      }
-    
+
+      this.addGate(this.draggingGate);
       this.draggingGate = null;
+    },
+
+    // Tap, click, or keyboard
+    onGateClick(gate) {
+      // A touch drag that ends near the gate can also fire a click;
+      // don't add the gate twice.
+      if (performance.now() - this.lastTouchDragEnd < 500) return;
+
+      this.addGate(gate);
+    },
+
+    // Touch and pen: native drag and drop doesn't work, so follow the
+    // pointer and add the gate if it is released over the circuit area.
+    onGatePointerDown(e, gate) {
+      if (e.pointerType === 'mouse') return;
+
+      this.touchDrag = {
+        gate,
+        x: e.clientX,
+        y: e.clientY,
+        startX: e.clientX,
+        startY: e.clientY,
+        moved: false,
+        over: false
+      };
+
+      window.addEventListener('pointermove', this.onGatePointerMove);
+      window.addEventListener('pointerup', this.onGatePointerUp);
+      window.addEventListener('pointercancel', this.stopGateDrag);
+    },
+
+    onGatePointerMove(e) {
+      const drag = this.touchDrag;
+      if (!drag) return;
+
+      drag.x = e.clientX;
+      drag.y = e.clientY;
+
+      if (Math.hypot(drag.x - drag.startX, drag.y - drag.startY) > 8) {
+        drag.moved = true;
+      }
+
+      drag.over = this.isOverDropzone(e.clientX, e.clientY);
+    },
+
+    onGatePointerUp(e) {
+      const drag = this.touchDrag;
+
+      this.stopGateDrag();
+
+      if (!drag || !drag.moved) return; // a tap: the click handler adds it
+
+      this.lastTouchDragEnd = performance.now();
+
+      if (this.isOverDropzone(e.clientX, e.clientY)) {
+        this.addGate(drag.gate);
+      }
+    },
+
+    stopGateDrag() {
+      this.touchDrag = null;
+
+      window.removeEventListener('pointermove', this.onGatePointerMove);
+      window.removeEventListener('pointerup', this.onGatePointerUp);
+      window.removeEventListener('pointercancel', this.stopGateDrag);
+    },
+
+    isOverDropzone(x, y) {
+      const zone = this.$refs.dropzone;
+      if (!zone) return false;
+
+      const r = zone.getBoundingClientRect();
+
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
     },
         
     async createBellState() {
@@ -2442,8 +2568,8 @@ const Manual = {
         <p><strong>Steps:</strong></p>
       
         <ol>
-          <li>Drag the mouse over the WebGL visualization</li>
-          <li>Use the mouse wheel to zoom</li>
+          <li>Drag over the WebGL visualization with the mouse or one finger</li>
+          <li>Use the mouse wheel, or pinch with two fingers, to zoom</li>
           <li>Observe the basis-state cube from different angles</li>
         </ol>
       
@@ -2474,7 +2600,7 @@ const Manual = {
       
         <ol>
           <li>Select a qubit</li>
-          <li>Drag gates into the circuit area</li>
+          <li>Tap a gate, or drag it into the circuit area</li>
           <li>Add multiple circuit steps</li>
           <li>Press Run Circuit</li>
         </ol>

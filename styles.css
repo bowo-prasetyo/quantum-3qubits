@@ -71,6 +71,7 @@ pre {
 
 .gate-palette {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -104,4 +105,41 @@ pre {
   background: #2f6fed;
   border-radius: 8px;
   color: white;
+}
+
+/* The 3D view handles its own drags and pinches, so the browser must not
+   scroll or zoom the page while a finger is on it. */
+.webgl-canvas {
+  touch-action: none;
+  cursor: grab;
+}
+
+.webgl-canvas:active {
+  cursor: grabbing;
+}
+
+/* Lets a finger drag a gate instead of scrolling the page */
+.gate {
+  touch-action: none;
+}
+
+.gate:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+}
+
+.circuit-dropzone.drop-target {
+  border-style: solid;
+  background: rgba(47, 111, 237, 0.2);
+}
+
+.drag-ghost {
+  position: fixed;
+  transform: translate(-50%, -150%);
+  padding: 10px 14px;
+  background: #2f6fed;
+  color: white;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1000;
 }
