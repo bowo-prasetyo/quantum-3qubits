@@ -1,4 +1,9 @@
 
+import * as engine from './engine.js';
+
+// This page simulates 3 qubits; engine.js works for any number.
+const QUBITS = 3;
+
 // Phase → colour, shared by the density matrix and the WebGL view so the
 // same colour always means the same phase. Phase 0 is red, π/2 yellow-green,
 // ±π cyan, −π/2 violet (hue = phase in degrees).
@@ -654,20 +659,7 @@ const Home = {
       return JSON.stringify(result, null, 2);
     },
     probabilities() {
-
-      const result = [];
-
-      for (let i = 0; i < 8; i++) {
-
-        result.push(
-
-          this.stateRe[i] * this.stateRe[i] +
-
-          this.stateIm[i] * this.stateIm[i]
-        );
-      }
-
-      return result;
+      return engine.probabilities(this.stateRe, this.stateIm);
     }
   },
 
@@ -710,7 +702,7 @@ const Home = {
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
         
     this.renderWebGL();
-    this.worker = new Worker('./worker.js');
+    this.worker = new Worker('./worker.js', { type: 'module' });
 
     this.worker.onmessage = (e) => {
       const { id, re, im, measured } = e.data;
@@ -950,67 +942,21 @@ const Home = {
       }
     },
         
+    // |⟨ZᵢZⱼ⟩| for each pair of qubits (see engine.zzCorrelation)
     computeEntanglementMatrix() {
-    
-      const pairs = [
-        [0, 1],
-        [0, 2],
-        [1, 2]
-      ];
-    
-      const result = [];
-    
-      for (const [q1, q2] of pairs) {
-    
-        let correlation = 0;
-    
-        for (let basis = 0; basis < 8; basis++) {
-    
-          const p =
-            this.stateRe[basis] ** 2 +
-            this.stateIm[basis] ** 2;
-    
-          const b1 =
-            (basis >> (2 - q1)) & 1;
-    
-          const b2 =
-            (basis >> (2 - q2)) & 1;
-    
-          correlation +=
-            p * (b1 === b2 ? 1 : -1);
-        }
-    
-        result.push({
-          q1,
-          q2,
-          strength: Math.abs(correlation)
-        });
-      }
-    
-      return result;
+      return [[0, 1], [0, 2], [1, 2]].map(([q1, q2]) => ({
+        q1,
+        q2,
+        strength: Math.abs(
+          engine.zzCorrelation(this.stateRe, this.stateIm, q1, q2, QUBITS)
+        )
+      }));
     },
-        
+
     computeBlochVectors() {
-
-      const vectors = [];
-
-      for (let q = 0; q < 3; q++) {
-
-        const rho =
-          this.getReducedDensityMatrix(q);
-
-        vectors.push({
-
-          x: 2 * rho.rho01Re,
-
-          y: -2 * rho.rho01Im,
-
-          z: rho.rho00 - rho.rho11
-
-        });
-      }
-
-      return vectors;
+      return [0, 1, 2].map(q =>
+        engine.blochVector(this.stateRe, this.stateIm, q, QUBITS)
+      );
     },
 
     drawSingleBlochSphere(canvas, x, y, z) {
@@ -1196,81 +1142,9 @@ const Home = {
     },
 
     getReducedDensityMatrix(qubit) {
-
-      let rho00Re = 0;
-      let rho11Re = 0;
-
-      let rho01Re = 0;
-      let rho01Im = 0;
-
-      for (let i = 0; i < 8; i++) {
-
-        const bitI = (i >> (2 - qubit)) & 1;
-
-        for (let j = 0; j < 8; j++) {
-
-          const bitJ = (j >> (2 - qubit)) & 1;
-
-          //
-          // Trace out all other qubits
-          //
-
-          let equal = true;
-
-          for (let k = 0; k < 3; k++) {
-
-            if (k === qubit) continue;
-
-            const bi = (i >> (2 - k)) & 1;
-            const bj = (j >> (2 - k)) & 1;
-
-            if (bi !== bj) {
-              equal = false;
-              break;
-            }
-          }
-
-          if (!equal) continue;
-
-          const ar = this.stateRe[i];
-          const ai = this.stateIm[i];
-
-          const br = this.stateRe[j];
-          const bi = -this.stateIm[j];
-
-          const re =
-            ar * br -
-            ai * bi;
-
-          const im =
-            ar * bi +
-            ai * br;
-
-          if (bitI === 0 && bitJ === 0)
-            rho00Re += re;
-
-          else if (bitI === 1 && bitJ === 1)
-            rho11Re += re;
-
-          else if (bitI === 0 && bitJ === 1) {
-
-            rho01Re += re;
-            rho01Im += im;
-          }
-        }
-      }
-
-      return {
-
-        rho00: rho00Re,
-
-        rho11: rho11Re,
-
-        rho01Re,
-
-        rho01Im
-
-      };
+      return engine.reducedDensityMatrix(
+        this.stateRe, this.stateIm, qubit, QUBITS
+      );
     },
 
     redrawAll() {
@@ -1512,18 +1386,15 @@ const Home = {
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // ρ = |ψ⟩⟨ψ|, so ρij = ψi · conj(ψj)
+      // ρ = |ψ⟩⟨ψ| (see engine.densityMatrix)
+      const rho = engine.densityMatrix(this.stateRe, this.stateIm);
       const entries = [];
       let max = 0;
 
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-          const re =
-            this.stateRe[i] * this.stateRe[j] +
-            this.stateIm[i] * this.stateIm[j];
-          const im =
-            this.stateIm[i] * this.stateRe[j] -
-            this.stateRe[i] * this.stateIm[j];
+          const re = rho.re[i * size + j];
+          const im = rho.im[i * size + j];
           const magnitude = Math.sqrt(re * re + im * im);
 
           entries.push({ i, j, magnitude, phase: Math.atan2(im, re) });
