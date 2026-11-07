@@ -336,7 +336,7 @@ const Home = {
         <p>
           <strong>Hadamard Gate (H)</strong><br>
           Creates superposition.
-          It transforms a definite classical state into a quantum mixture of possibilities.
+          It turns a definite state such as |0⟩ into an equal superposition of |0⟩ and |1⟩.
         </p>
       
         <p>
@@ -1758,7 +1758,7 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          The measurement frequently becomes |100⟩ because
+          The measurement always becomes |100⟩ because
           qubit 0 was flipped from 0 to 1 while
           qubits 1 and 2 remain unchanged.
         </p>
@@ -1833,7 +1833,7 @@ const Manual = {
         <p><strong>Expected Result:</strong></p>
       
         <p>
-          The second measurement usually matches the first because
+          The second measurement always matches the first because
           the quantum state already collapsed.
         </p>
       </div>
@@ -1931,7 +1931,7 @@ const Manual = {
       
         <p>
           In this simulator, the two qubits become linked so that
-          they tend to produce matching measurement results.
+          they always produce matching measurement results.
         </p>
       
         <p><strong>Objective:</strong></p>
@@ -1967,7 +1967,7 @@ const Manual = {
         
         <p>
           Measurements become either |000⟩ or |110⟩,
-          while most other basis states rarely appear.
+          while the other six basis states never appear.
         </p>
         
         <p>

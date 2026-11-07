@@ -173,7 +173,7 @@ Typical measurements become:
 |110⟩
 ```
 
-while other basis states rarely appear.
+while the other six basis states never appear.
 
 ---
 
