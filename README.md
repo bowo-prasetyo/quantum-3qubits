@@ -357,16 +357,44 @@ To upgrade a library:
 quantum-3qubits/
 ├── index.html
 ├── app.js
-├── router.js
-├── worker.js
+├── router.js          # Vue pages and visualizations
+├── engine.js          # Simulation maths: pure functions, any number of qubits
+├── worker.js          # Background worker: runs engine.js gates and measurement
 ├── db.js
 ├── styles.css
+├── tests/
+│   └── engine.test.js # Unit tests for engine.js
+├── package.json       # Only configures the tests; the app has no build step
+├── docs/
 └── README.md
 ```
 
 ---
 
+## Running Tests
+
+The simulation engine has unit tests that use Node's built-in test runner, so there is nothing to install. With Node.js 20 or newer:
+
+```bash
+npm test
+```
+
+The tests cover:
+
+- gate matrices and identities
+- CNOT on every pair of qubits
+- Bell and GHZ states
+- normalization
+- measurement statistics
+- density matrices, reduced states, Bloch vectors and correlations
+
+GitHub Actions runs them on every pull request.
+
+---
+
 ## Architecture
+
+All the simulation maths lives in `engine.js`, a set of pure functions with no dependency on the page. Both the main thread and the worker use it, and it is covered by unit tests.
 
 ### Main Thread
 
@@ -378,9 +406,7 @@ Responsible for:
 - Bloch sphere rendering
 - Correlation graph rendering
 - WebGL visualization
-- Density matrix computation
-- Reduced density matrix and Bloch vector computation
-- Correlation computation
+- Density matrix, reduced density matrix, Bloch vector and correlation computation (using `engine.js`)
 - Running Bell, GHZ and circuit sequences, one worker step at a time
 - IndexedDB persistence
 - User interaction
@@ -392,6 +418,8 @@ Responsible for:
 - Single-qubit gate operations on the state vector
 - CNOT computation
 - Measurement and collapse
+
+The worker is a module worker that imports `engine.js`.
 
 The main thread sends the current state with each request and receives the new state back.
 Gates and measurements run in the background, and the main thread computes what is displayed from the returned state.
