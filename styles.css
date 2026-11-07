@@ -33,12 +33,36 @@ button:hover {
   opacity: 0.9;
 }
 
+/* Canvases keep their own width/height ratio and shrink on narrow screens */
 canvas {
+  display: block;
   background: #000;
   border-radius: 12px;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.bloch-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.bloch-row > div {
+  flex: 1 1 200px;
+  max-width: 260px;
+  text-align: center;
+}
+
+.bloch-row canvas {
   width: 100%;
-  max-width: 600px;
-  height: 400px;
+}
+
+.caption {
+  color: #aaa;
+  font-size: 14px;
 }
 
 pre {

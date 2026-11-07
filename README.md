@@ -42,7 +42,7 @@ The simulator is fully client-side and deployable on GitHub Pages.
 - Reduced density matrix computation
 - Bloch sphere visualization
 - Entanglement graph visualization
-- WebGL accelerated visualization
+- 3D WebGL basis-state visualization
 
 ### Application Features
 
@@ -52,6 +52,7 @@ The simulator is fully client-side and deployable on GitHub Pages.
 - IndexedDB persistence
 - Client-side architecture
 - GitHub Pages compatible
+- Drag-and-drop quantum circuit editor
 - Educational user manual
 - Quantum concepts reference
 - Automatic state restoration
@@ -204,7 +205,9 @@ Typical measurements become:
 
 ## Density Matrix Support
 
-The simulator computes the complete density matrix of the quantum system.
+The simulator computes and displays the complete density matrix of the quantum system.
+
+In the display, each square's area shows the size of an entry compared with the largest entry, its colour shows the phase, and the diagonal shows the measurement probabilities.
 
 The density matrix provides:
 
@@ -256,13 +259,11 @@ Stronger connections indicate stronger quantum correlations.
 
 ## WebGL Visualization
 
-GPU-accelerated WebGL rendering is used for advanced visualizations.
+The WebGL view places the eight basis states at the corners of a 3D cube.
 
-Benefits include:
-
-- Smoother rendering
-- Better scalability
-- Future support for larger simulations
+- Point size shows each state's probability
+- Colour shows the phase of its amplitude, using the same colours as the density matrix
+- Drag to rotate the cube and use the mouse wheel to zoom
 
 ---
 
@@ -414,8 +415,6 @@ The included User Manual demonstrates:
 
 Possible future enhancements:
 
-- Quantum circuit editor
-- Drag-and-drop gates
 - Animated gate transitions
 - Quantum Fourier Transform
 - Grover's algorithm
